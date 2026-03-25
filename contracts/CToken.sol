@@ -10,6 +10,7 @@ import "./interfaces/IComptroller.sol";
 import "./interfaces/IPriceOracle.sol";
 import "./interfaces/ITrustedRelayer.sol";
 
+// TODO: Phase 2 - Migrate to FHERC20 for fully encrypted token balances
 contract CToken is ERC20, Ownable {
 
     using SafeERC20 for IERC20;
@@ -68,11 +69,6 @@ contract CToken is ERC20, Ownable {
         _;
     }
 
-    modifier onlyTrustedRelayer() {
-        require(msg.sender == address(trustedRelayer), "Only trusted relayer");
-        _;
-    }
-
     // ===== CONSTRUCTOR =====
     constructor(
         IERC20 _underlying,
@@ -119,12 +115,93 @@ contract CToken is ERC20, Ownable {
 
     // ===== VIEW FUNCTIONS =====
 
-    function getSupplyBalance(address user) external view onlyTrustedRelayer returns (euint128) {
+    function getSupplyBalance(address user) external view returns (euint128) {
         return userSupplyBalances[user];
     }
 
-    function getBorrowBalance(address user) external view onlyTrustedRelayer returns (euint128) {
+    function getBorrowBalance(address user) external view returns (euint128) {
         return userBorrowBalances[user];
+    }
+    
+    /**
+     * @notice Get account snapshot with encrypted balances
+     * @param user User address
+     * @return error Error code (0 = no error)
+     * @return cTokenBalance User's cToken balance (encrypted)
+     * @return borrowBalance User's borrow balance (encrypted)
+     * @return _exchangeRate Current exchange rate (public)
+     * @dev Not view because FHE.allowSender modifies state for permission granting
+     */
+    function getAccountSnapshot(address user) 
+        external 
+        returns (uint error, euint128 cTokenBalance, euint128 borrowBalance, uint256 _exchangeRate) 
+    {
+        cTokenBalance = FHE.asEuint128(balanceOf(user));
+        borrowBalance = userBorrowBalances[user];
+        _exchangeRate = exchangeRate;
+        
+        // Grant access to caller so they can decrypt with decryptForView
+        FHE.allowSender(cTokenBalance);
+        FHE.allowSender(borrowBalance);
+        
+        return (0, cTokenBalance, borrowBalance, _exchangeRate);
+    }
+    
+    /**
+     * @notice Get user liquidity for this specific market
+     * @param user User address
+     * @return liquidity Available liquidity (encrypted)
+     * @return shortfall Shortfall amount if liquidatable (encrypted)
+     * @dev Not view because FHE.allowSender modifies state for permission granting
+     */
+    function getLiquidity(address user) 
+        external 
+        returns (euint128 liquidity, euint128 shortfall) 
+    {
+        // Get balances
+        euint128 supplyBalance = userSupplyBalances[user];
+        euint128 borrowBalance = userBorrowBalances[user];
+        
+        // Get price (public)
+        uint256 price = oracle.getPrice(address(this));
+        euint128 encPrice = FHE.asEuint128(price);
+        
+        // Get collateral factor from comptroller (public) - returns uint256
+        uint256 collateralFactorUint = comptroller.getCollateralFactor(address(this));
+        euint128 encCollateralFactor = FHE.asEuint128(collateralFactorUint);
+        
+        // Calculate collateral value: supply * price * collateralFactor
+        euint128 collateralValue = FHE.mul(
+            FHE.mul(supplyBalance, encPrice),
+            encCollateralFactor
+        );
+        // Scale back by 1e36 (1e18 from price, 1e18 from collateralFactor)
+        collateralValue = FHE.div(collateralValue, FHE.asEuint128(1e36));
+        
+        // Calculate borrow value: borrow * price
+        euint128 borrowValue = FHE.mul(borrowBalance, encPrice);
+        
+        // Calculate liquidity and shortfall using encrypted comparisons
+        euint128 zero = FHE.asEuint128(0);
+        ebool hasCollateralMore = FHE.gte(collateralValue, borrowValue);
+        
+        liquidity = FHE.select(
+            hasCollateralMore,
+            FHE.sub(collateralValue, borrowValue),
+            zero
+        );
+        
+        shortfall = FHE.select(
+            hasCollateralMore,
+            zero,
+            FHE.sub(borrowValue, collateralValue)
+        );
+        
+        // Grant access to caller so they can decrypt with decryptForView
+        FHE.allowSender(liquidity);
+        FHE.allowSender(shortfall);
+        
+        return (liquidity, shortfall);
     }
 
     function calculateUnderlying(uint256 cTokenAmount) external view returns (uint256) {
@@ -178,6 +255,8 @@ contract CToken is ERC20, Ownable {
         FHE.allow(userSupplyBalances[user], address(comptroller));
         FHE.allow(userBorrowBalances[user], address(trustedRelayer));
         FHE.allow(userSupplyBalances[user], address(trustedRelayer));
+        FHE.allowSender(userBorrowBalances[user]);
+        FHE.allowSender(userSupplyBalances[user]);
 
         lastAccrualBlock[user] = currentBlock;
 
@@ -207,6 +286,7 @@ contract CToken is ERC20, Ownable {
         FHE.allowThis(userSupplyBalances[msg.sender]);
         FHE.allow(userSupplyBalances[msg.sender], address(comptroller));
         FHE.allow(userSupplyBalances[msg.sender], address(trustedRelayer));
+        FHE.allowSender(userSupplyBalances[msg.sender]);
 
         // 6. Update public totals (_mint already updates ERC20 totalSupply)
         totalUnderlying += underlyingAmount;
@@ -245,6 +325,7 @@ contract CToken is ERC20, Ownable {
         FHE.allowThis(userSupplyBalances[msg.sender]);
         FHE.allow(userSupplyBalances[msg.sender], address(comptroller));
         FHE.allow(userSupplyBalances[msg.sender], address(trustedRelayer));
+        FHE.allowSender(userSupplyBalances[msg.sender]);
 
         // 7. Update public totals (_burn already updates ERC20 totalSupply)
         totalUnderlying -= underlyingAmount;
@@ -278,6 +359,7 @@ contract CToken is ERC20, Ownable {
         FHE.allowThis(userBorrowBalances[msg.sender]);
         FHE.allow(userBorrowBalances[msg.sender], address(comptroller));
         FHE.allow(userBorrowBalances[msg.sender], address(trustedRelayer));
+        FHE.allowSender(userBorrowBalances[msg.sender]);
 
         // 5. Update public totals
         totalBorrows += amount;
@@ -307,6 +389,7 @@ contract CToken is ERC20, Ownable {
         FHE.allowThis(userBorrowBalances[msg.sender]);
         FHE.allow(userBorrowBalances[msg.sender], address(comptroller));
         FHE.allow(userBorrowBalances[msg.sender], address(trustedRelayer));
+        FHE.allowSender(userBorrowBalances[msg.sender]);
 
         // 5. Transfer tokens from user
         underlying.safeTransferFrom(msg.sender, address(this), amount);

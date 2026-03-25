@@ -152,27 +152,16 @@ contract TrustedRelayer is Ownable {
             // Get price from oracle
             uint256 price = oracle.getPrice(market);
             
-            // Get collateral factor
-            euint128 encCollateralFactor = comptroller.getCollateralFactor(market);
+            // Get collateral factor (now returns uint256)
+            uint256 collateralFactor = comptroller.getCollateralFactor(market);
             
             // For now, we need to decrypt the balances to calculate the health factor
             // This is a limitation of the current approach
             // In production, we would use the decrypt-with-proof pattern
             
-            // For Phase 2, we'll use a simplified approach:
-            // Calculate assuming we can access the encrypted values
-            // The real implementation would use TrustedRelayer's decryption capabilities
-            
             // Placeholder: assume healthy for now
             // TODO: Implement proper decryption of balances
         }
-        
-        // For now, return a healthy health factor
-        // In a full implementation, we would:
-        // 1. Decrypt each encrypted balance using decrypt-with-proof pattern
-        // 2. Calculate total collateral and borrow values
-        // 3. Compute health factor = (collateral * 1e18) / borrow
-        // 4. Handle the case where borrow = 0 (return healthy)
         
         uint256 healthFactor = 2e18;
         bool liquidatable = healthFactor < HEALTH_THRESHOLD;

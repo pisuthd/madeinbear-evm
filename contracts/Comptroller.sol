@@ -4,6 +4,7 @@ pragma solidity ^0.8.25;
 import "@fhenixprotocol/cofhe-contracts/FHE.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "./interfaces/IPriceOracle.sol";
+import "./interfaces/ICToken.sol";
 
 /**
  * @title Comptroller
@@ -218,6 +219,81 @@ import "./interfaces/IPriceOracle.sol";
         uint256 oldIncentive = liquidationIncentive;
         liquidationIncentive = newLiquidationIncentive;
         emit LiquidationIncentiveUpdated(oldIncentive, newLiquidationIncentive);
+    }
+    
+    // ===== Account Liquidity =====
+    
+    /**
+     * @notice Determine the current account liquidity wrt collateral requirements
+     * @param account User address to check
+     * @return error Error code (0 = no error)
+     * @return liquidity Account liquidity in excess of collateral requirements (encrypted)
+     * @return shortfall Account shortfall below collateral requirements (encrypted)
+     * @dev Calculates total collateral value across all markets and subtracts total borrow value
+     * @dev Not view because FHE.allowSender modifies state for permission granting
+     */
+    function getAccountLiquidity(address account) external returns (uint error, euint128 liquidity, euint128 shortfall) {
+        euint128 totalCollateralValue = FHE.asEuint128(0);
+        euint128 totalBorrowValue = FHE.asEuint128(0);
+        
+        for (uint256 i = 0; i < markets.length; i++) {
+            address market = markets[i];
+            if (!isMarket[market]) continue;
+            
+            ICToken cToken = ICToken(market);
+            
+            // Get encrypted balances from cToken
+            euint128 supplyBalance = cToken.getSupplyBalance(account);
+            euint128 borrowBalance = cToken.getBorrowBalance(account);
+            
+            // Get price from oracle (public value)
+            uint256 price = oracle.getPrice(market);
+            euint128 encPrice = FHE.asEuint128(price);
+            
+            // Get collateral factor (public value)
+            uint256 collateralFactor = collateralFactors[market];
+            euint128 encCollateralFactor = FHE.asEuint128(collateralFactor);
+            
+            // Calculate collateral value: supply * price * collateralFactor
+            euint128 collateralValue = FHE.mul(
+                FHE.mul(supplyBalance, encPrice),
+                encCollateralFactor
+            );
+            // Scale back by 1e36 (1e18 from price, 1e18 from collateralFactor)
+            collateralValue = FHE.div(collateralValue, FHE.asEuint128(1e36));
+            
+            // Calculate borrow value: borrow * price
+            euint128 borrowValue = FHE.mul(borrowBalance, encPrice);
+            
+            // Accumulate totals
+            totalCollateralValue = FHE.add(totalCollateralValue, collateralValue);
+            totalBorrowValue = FHE.add(totalBorrowValue, borrowValue);
+        }
+        
+        // Calculate liquidity and shortfall using encrypted comparisons
+        // If collateral >= borrow: liquidity = collateral - borrow, shortfall = 0
+        // If borrow > collateral: liquidity = 0, shortfall = borrow - collateral
+        
+        euint128 zero = FHE.asEuint128(0);
+        ebool hasCollateralMore = FHE.gte(totalCollateralValue, totalBorrowValue);
+        
+        liquidity = FHE.select(
+            hasCollateralMore,
+            FHE.sub(totalCollateralValue, totalBorrowValue),
+            zero
+        );
+        
+        shortfall = FHE.select(
+            hasCollateralMore,
+            zero,
+            FHE.sub(totalBorrowValue, totalCollateralValue)
+        );
+        
+        // Grant access to caller so they can decrypt with decryptForView
+        FHE.allowSender(liquidity);
+        FHE.allowSender(shortfall);
+        
+        return (0, liquidity, shortfall);
     }
 
 }

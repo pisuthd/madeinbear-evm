@@ -31,7 +31,10 @@
 		"//   -------------------": "",
 		"arb-sepolia:deploy-counter": "hardhat deploy-counter --network arb-sepolia",
 		"arb-sepolia:increment-counter": "hardhat increment-counter --network arb-sepolia",
-		"arb-sepolia:reset-counter": "hardhat reset-counter --network arb-sepolia"
+		"arb-sepolia:reset-counter": "hardhat reset-counter --network arb-sepolia",
+		"deploy-compound": "hardhat deploy-compound",
+		"eth-sepolia:deploy-compound": "hardhat deploy-compound --network eth-sepolia",
+		"arb-sepolia:deploy-compound": "hardhat deploy-compound --network arb-sepolia"
 	},
 	"repository": {
 		"type": "git",
