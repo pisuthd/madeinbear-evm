@@ -10,10 +10,27 @@ import "./interfaces/ICToken.sol";
 /**
  * @title TrustedRelayer
  * @notice Trusted relayer for calculating and decrypting health factors
+ * @dev Supports both human operators and autonomous AI agents
  * @dev Calculates health factor by querying encrypted balances from cTokens
  * @dev Decrypts the result for validation checks
+ * 
+ * @notice Authorized callers can be:
+ *   - Human operators (EOAs) for manual liquidation
+ *   - AI agents (smart contracts) for automated liquidation
+ *   - Liquidation bots with specific strategies
+ *   - Risk monitoring services
+ *   - Multi-signature wallets for collective decisions
+ * 
+ * @dev Use Cases:
+ *   - Manual liquidation by trusted operators
+ *   - Automated AI-driven liquidation
+ *   - Hybrid approaches with multiple authorization tiers
+ *   - Risk assessment and monitoring
+ *   - MEV-aware liquidation strategies
  */
+
 contract TrustedRelayer is Ownable {
+
     // ===== Public Storage =====
     
     /// @notice Comptroller contract address
@@ -67,6 +84,10 @@ contract TrustedRelayer is Ownable {
     /**
      * @notice Authorize a caller to query health factors
      * @param caller Address to authorize
+     * @dev Caller can be:
+     *   - EOA (human operator, liquidation bot)
+     *   - Smart contract (AI agent, automated liquidator)
+     *   - Multi-sig wallet (collective decision-making)
      */
     function authorizeCaller(address caller) external onlyOwner {
         if (caller == address(0)) revert ZeroAddress();
@@ -213,4 +234,5 @@ contract TrustedRelayer is Ownable {
         oracle = IPriceOracle(newOracle);
         emit OracleUpdated(oldOracle, newOracle);
     }
+
 }

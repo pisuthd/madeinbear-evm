@@ -2,12 +2,13 @@
 pragma solidity ^0.8.25;
 
 /**
- * @title FHEPriceOracle
+ * @title PriceOracle
  * @notice Simple price oracle for FHE-enabled Compound protocol
  * @dev Returns plaintext prices to maintain market transparency
- * @dev Prices are returned with 18 decimals (standard for USD-denominated assets)
+ * @dev Prices are returned with 18 decimals
  */
-contract FHEPriceOracle {
+
+ contract PriceOracle {
     address public admin;
     mapping(address => uint256) public prices;
     

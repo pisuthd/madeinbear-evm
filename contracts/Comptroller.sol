@@ -6,11 +6,13 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "./interfaces/IPriceOracle.sol";
 
 /**
- * @title FHEComptroller
+ * @title Comptroller
  * @notice FHE-enabled comptroller for Compound protocol risk management
  * @dev Manages markets, collateral factors (PUBLIC), and market parameters
  */
-contract FHEComptroller is Ownable {
+
+ contract Comptroller is Ownable {
+
     // ===== Public Storage =====
     
     /// @notice List of all markets
@@ -217,4 +219,5 @@ contract FHEComptroller is Ownable {
         liquidationIncentive = newLiquidationIncentive;
         emit LiquidationIncentiveUpdated(oldIncentive, newLiquidationIncentive);
     }
+
 }

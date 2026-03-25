@@ -10,7 +10,8 @@ import "./interfaces/IComptroller.sol";
 import "./interfaces/IPriceOracle.sol";
 import "./interfaces/ITrustedRelayer.sol";
 
-contract FHECToken is ERC20, Ownable {
+contract CToken is ERC20, Ownable {
+
     using SafeERC20 for IERC20;
 
     // ===== PUBLIC STATE =====
@@ -19,13 +20,13 @@ contract FHECToken is ERC20, Ownable {
     IPriceOracle public oracle;
     ITrustedRelayer public trustedRelayer;
 
-    // Interest rates (fixed for Phase 2)
+    // Interest rates
     uint256 public borrowRate = 0.05e18;    // 5% APY
     uint256 public supplyRate = 0.02e18;    // 2% APY
     uint256 public constant RATE_PRECISION = 1e18;
-    uint256 public constant BLOCKS_PER_YEAR = 2_628_000; // ~15s block time
+    uint256 public constant BLOCKS_PER_YEAR = 2_628_000; // ~12s block time
 
-    // Exchange rate (cTokens to underlying)
+     // Exchange rate (cTokens to underlying)
     uint256 public exchangeRate = 1e18;
 
     // Global totals (public for transparency)
@@ -317,4 +318,7 @@ contract FHECToken is ERC20, Ownable {
         emit Repay(msg.sender, amount);
         return amount;
     }
+
+
+
 }

@@ -1,13 +1,6 @@
 import { loadFixture } from "@nomicfoundation/hardhat-toolbox/network-helpers";
 import { expect } from "chai";
-import hre from "hardhat";
-import {
-  MockERC20,
-  FHEComptroller,
-  FHEPriceOracle,
-  FHECToken,
-  TrustedRelayer,
-} from "../../typechain-types";
+import hre from "hardhat"; 
 
 describe("FHE Compound Protocol", function () {
   async function deployCompoundFixture() {
@@ -19,11 +12,11 @@ describe("FHE Compound Protocol", function () {
     const wbtc = await MockERC20Factory.deploy("Wrapped BTC", "WBTC", 0, await owner.getAddress());
 
     // Deploy oracle (requires admin address)
-    const OracleFactory = await hre.ethers.getContractFactory("FHEPriceOracle");
+    const OracleFactory = await hre.ethers.getContractFactory("PriceOracle");
     const oracle = await OracleFactory.deploy(await owner.getAddress());
 
     // Deploy comptroller FIRST (temp with owner as trusted relayer)
-    const ComptrollerFactory = await hre.ethers.getContractFactory("FHEComptroller");
+    const ComptrollerFactory = await hre.ethers.getContractFactory("Comptroller");
     const comptroller = await ComptrollerFactory.deploy(
       await oracle.getAddress(),
       await owner.getAddress() // temporary
@@ -40,7 +33,7 @@ describe("FHE Compound Protocol", function () {
     await comptroller.setTrustedRelayer(await trustedRelayer.getAddress());
 
     // Deploy cTokens
-    const CTokenFactory = await hre.ethers.getContractFactory("FHECToken");
+    const CTokenFactory = await hre.ethers.getContractFactory("CToken");
     const cUSDC = await CTokenFactory.deploy(
       await usdc.getAddress(),
       await comptroller.getAddress(),
@@ -214,7 +207,7 @@ describe("FHE Compound Protocol", function () {
       const marketCount = await comptroller.getMarketCount();
       const initialCount = await marketCount;
 
-      const CTokenFactory = await hre.ethers.getContractFactory("FHECToken");
+      const CTokenFactory = await hre.ethers.getContractFactory("CToken");
       const newCToken = await CTokenFactory.deploy(
         await usdc.getAddress(),
         await comptroller.getAddress(),
