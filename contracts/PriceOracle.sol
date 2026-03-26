@@ -1,82 +1,144 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.25;
 
+import "@openzeppelin/contracts/access/Ownable.sol";
+
+interface CCToken {
+    function symbol() external view returns (string memory);
+    function underlying() external view returns (address);
+    function decimals() external view returns (uint8);
+}
+
 /**
  * @title PriceOracle
- * @notice Simple price oracle for FHE-enabled Compound protocol
- * @dev Returns plaintext prices to maintain market transparency
- * @dev Prices are returned with 18 decimals
+ * @notice A Compound V2-compatible price oracle for FHE-enabled Compound protocol
+ *      - Fallback mode (default): allows admins to manually set fallback prices for testing 
+ *      - Oracle mode: TBD
+ * @dev Prices are normalized to account for underlying token decimals:
+ *      - For 18-decimal tokens: price = USD_price * 1e18
+ *      - For 6-decimal tokens:  price = USD_price * 1e30 (1e18 * 1e12 decimal adjustment)
+ *      - For 8-decimal tokens:  price = USD_price * 1e28 (1e18 * 1e10 decimal adjustment)
  */
 
- contract PriceOracle {
-    address public admin;
-    mapping(address => uint256) public prices;
+ contract PriceOracle is Ownable {
     
-    event PriceUpdated(address indexed token, uint256 oldPrice, uint256 newPrice);
-    event AdminUpdated(address indexed oldAdmin, address indexed newAdmin);
-    
-    /**
-     * @notice Constructor
-     * @param _admin Admin address that can update prices
-     */
-    constructor(address _admin) {
-        admin = _admin;
+    // Oracle mode per token: 0=fallback, ...
+    mapping(address => uint8) public oracleMode;
+    mapping(address => uint256) public fallbackPrices;
+ 
+    mapping(address => bool) public whitelist;
+ 
+    uint256 public constant MIN_PRICE = 1e6;    // $0.000001
+    uint256 public constant MAX_PRICE = 1e24;   // $1,000,000
+
+    event PricePosted(address asset, uint previousPriceMantissa, uint requestedPriceMantissa, uint newPriceMantissa); 
+    event OracleModeSet(address token, uint8 mode); 
+
+    modifier isWhitelisted() {
+        require(whitelist[msg.sender], "Not whitelisted");
+        _;
     }
     
-    /**
-     * @notice Get price for a token
-     * @param token Token address
-     * @return Price in USD with 18 decimals
-     */
-    function getPrice(address token) external view returns (uint256) {
-        uint256 price = prices[token];
-        require(price > 0, "Price not set for token");
-        return price;
+    constructor() Ownable(msg.sender) {
+        whitelist[msg.sender] = true;
+    }
+
+    function _getUnderlyingAddress(CCToken cToken) private view returns (address) {
+        address asset;
+        if (compareStrings(cToken.symbol(), "ccETH")) {
+            asset = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
+        } else {
+            asset = address(CCToken(address(cToken)).underlying());
+        }
+        return asset;
     }
     
-    /**
-     * @notice Update price for a token (admin only)
-     * @param token Token address
-     * @param newPrice New price in USD with 18 decimals
-     */
-    function setPrice(address token, uint256 newPrice) external {
-        require(msg.sender == admin, "Only admin can set price");
-        require(newPrice > 0, "Price must be positive");
+    function getUnderlyingPrice(CCToken cToken) public view returns (uint) {
+        address underlying = _getUnderlyingAddress(cToken);
+        uint8 underlyingDecimals = _getUnderlyingDecimals(underlying);
+
+        uint256 basePrice = fallbackPrices[underlying];
+ 
+        // Apply decimal adjustment for Compound V2 compatibility
+        uint256 decimalAdjustment = _getDecimalAdjustment(underlyingDecimals);
         
-        uint256 oldPrice = prices[token];
-        prices[token] = newPrice;
-        
-        emit PriceUpdated(token, oldPrice, newPrice);
-    }
-    
-    /**
-     * @notice Batch update prices (admin only)
-     * @param tokens Array of token addresses
-     * @param newPrices Array of new prices
-     */
-    function setPrices(address[] calldata tokens, uint256[] calldata newPrices) external {
-        require(msg.sender == admin, "Only admin can set prices");
-        require(tokens.length == newPrices.length, "Arrays length mismatch");
-        
-        for (uint256 i = 0; i < tokens.length; i++) {
-            require(newPrices[i] > 0, "Price must be positive");
-            uint256 oldPrice = prices[tokens[i]];
-            prices[tokens[i]] = newPrices[i];
-            emit PriceUpdated(tokens[i], oldPrice, newPrices[i]);
+        // Avoid overflow by checking if we need to divide instead of multiply
+        if (decimalAdjustment > 1e18) {
+            return basePrice * (decimalAdjustment / 1e18);
+        } else {
+            return basePrice * decimalAdjustment / 1e18;
         }
     }
-    
+
+    function setDirectPrice(address asset, uint price) public isWhitelisted { 
+        // automatically enable fallback mode if not set
+        if (fallbackPrices[asset] == 0) {
+            oracleMode[asset] = 0; // fallback mode
+        }
+        require(oracleMode[asset] == 0, "only fallback mode"); 
+        require(price > 0, "price must be positive");
+        require(price >= MIN_PRICE && price <= MAX_PRICE, 
+            "price out of global bounds");
+
+        emit PricePosted(asset, fallbackPrices[asset], price, price);
+        fallbackPrices[asset] = price; 
+    }
+
+    function getPriceInfo(CCToken cToken) external view returns (
+        address underlying,
+        uint8 decimals,
+        uint256 basePrice,
+        uint256 finalPrice,
+        uint256 decimalAdjustment
+    ) {
+        underlying = _getUnderlyingAddress(cToken);
+        decimals = _getUnderlyingDecimals(underlying);
+         
+        basePrice = fallbackPrices[underlying]; 
+        
+        decimalAdjustment = _getDecimalAdjustment(decimals);
+        finalPrice = getUnderlyingPrice(cToken);
+    }
+
+    function _getUnderlyingDecimals(address underlying) private view returns (uint8) { 
+        if (underlying == 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE) {
+            return 18;
+        }
+        
+        return CCToken(underlying).decimals();
+    }   
+
+    function _getDecimalAdjustment(uint8 tokenDecimals) private pure returns (uint256) {
+        if (tokenDecimals >= 18) {
+            return 1e18;
+        }
+        
+        // For tokens with < 18 decimals, multiply by additional factor
+        // This ensures borrowBalance * price calculation works correctly
+        uint8 decimalDifference = 18 - tokenDecimals;
+        return 1e18 * (10 ** decimalDifference);
+    }
+
+    function compareStrings(string memory a, string memory b) internal pure returns (bool) {
+        return (keccak256(abi.encodePacked((a))) == keccak256(abi.encodePacked((b))));
+    }
+
+    // Whitelist management functions
+
     /**
-     * @notice Update admin address
-     * @param newAdmin New admin address
+     * @notice Add address to whitelist for setDirectPrice function
+     * @param user The address to add to whitelist
      */
-    function setAdmin(address newAdmin) external {
-        require(msg.sender == admin, "Only admin can update");
-        require(newAdmin != address(0), "Invalid admin address");
-        
-        address oldAdmin = admin;
-        admin = newAdmin;
-        
-        emit AdminUpdated(oldAdmin, newAdmin);
+    function addToWhitelist(address user) external onlyOwner {
+        require(user != address(0), "Cannot whitelist zero address");
+        whitelist[user] = true; 
+    }
+
+    /**
+     * @notice Remove address from whitelist
+     * @param user The address to remove from whitelist
+     */
+    function removeFromWhitelist(address user) external onlyOwner {
+        whitelist[user] = false; 
     }
 }
