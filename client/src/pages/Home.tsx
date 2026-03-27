@@ -1,21 +1,19 @@
 import Hero from '../components/home/Hero';
+import KeyFeatures from '../components/home/KeyFeatures';
 import HowItWorks from '../components/home/HowItWorks';
 import WhyAgentToAgent from '../components/home/WhyAgentToAgent';
 // import ComplianceStack from '../components/home/ComplianceStack';
 import CTA from '../components/home/CTA';
 
-interface HomeProps {
-  onNavigate: (path: string) => void;
-}
-
-function Home({ onNavigate }: HomeProps) {
+function Home() {
   return (
     <main className="min-h-screen bg-bg-primary">
-      <Hero onNavigate={onNavigate} />
-      <HowItWorks />
-      <WhyAgentToAgent />
+      <Hero />
+      <KeyFeatures />
+      {/* <HowItWorks />
+      <WhyAgentToAgent /> */}
       {/* <ComplianceStack /> */}
-      <CTA onNavigate={onNavigate} />
+      {/* <CTA /> */}
     </main>
   );
 }

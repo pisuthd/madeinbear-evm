@@ -1,4 +1,6 @@
-function Footer({ onNavigate }: { onNavigate?: (path: string) => void }) {
+import { Link } from 'react-router-dom';
+
+function Footer() {
   return (
     <footer className="bg-[#1e293b] border-t border-[#334155]">
       <div className="max-w-7xl mx-auto   py-12">
@@ -7,20 +9,15 @@ function Footer({ onNavigate }: { onNavigate?: (path: string) => void }) {
 
           {/* Column 1: Logo & Description */}
           <div className="text-center col-span-2 md:text-left">
-            <a
-              href="#/"
-              onClick={(e) => {
-                e.preventDefault();
-                window.location.hash = '/';
-                window.location.reload();
-              }}
+            <Link
+              to="/"
               className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-[#3eddfd] to-white bg-clip-text text-transparent mb-4 inline-block hover:opacity-80 transition-opacity"
               style={{ fontFamily: '"Orbitron", sans-serif' }}
             >
               MadeInBear
-            </a>
+            </Link>
             <p className="text-[#94a3b8] text-sm leading-relaxed">
-              Agentic Finance for Institutions on Solana
+              Confidential Lending for Institutional Capital on Fhenix
             </p>
           </div>
 
@@ -29,28 +26,28 @@ function Footer({ onNavigate }: { onNavigate?: (path: string) => void }) {
             <h3 className="text-[#f8fafc] font-semibold mb-4 text-lg">Quick Links</h3>
             <ul className="space-y-2">
               <li>
-                <button
-                  onClick={() => onNavigate?.('/board')}
-                  className="text-[#94a3b8] hover:text-[#3eddfd] transition-colors text-sm"
-                >
-                  Negotiation Board
-                </button>
-              </li>
-              <li>
-                <button
-                  onClick={() => onNavigate?.('/deploy-agent')}
-                  className="text-[#94a3b8] hover:text-[#3eddfd] transition-colors text-sm"
-                >
-                  Escrows
-                </button>
-              </li>
-              <li>
-                <button
-                  onClick={() => onNavigate?.('/dashboard')}
+                <Link
+                  to="/dashboard"
                   className="text-[#94a3b8] hover:text-[#3eddfd] transition-colors text-sm"
                 >
                   Dashboard
-                </button>
+                </Link>
+              </li>
+              <li>
+                <Link
+                  to="/credentials"
+                  className="text-[#94a3b8] hover:text-[#3eddfd] transition-colors text-sm"
+                >
+                  Credentials
+                </Link>
+              </li>
+              <li>
+                <Link
+                  to="/ask-ai"
+                  className="text-[#94a3b8] hover:text-[#3eddfd] transition-colors text-sm"
+                >
+                  Ask AI
+                </Link>
               </li>
             </ul>
           </div>
@@ -123,7 +120,6 @@ function Footer({ onNavigate }: { onNavigate?: (path: string) => void }) {
             <p className="text-[#94a3b8] text-sm mb-1">
               © 2026
               {` `}
-              {/* Tamago Labs Japan */}
               <a
                 href="https://tamagolabs.com"
                 target="_blank"

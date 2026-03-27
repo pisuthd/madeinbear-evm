@@ -1,8 +1,6 @@
-interface HeroProps {
-  onNavigate: (path: string) => void;
-}
+import { Link } from 'react-router-dom';
 
-function Hero({ onNavigate }: HeroProps) {
+function Hero() {
   return (
     <section className="relative flex items-center min-h-screen px-4 md:px-8 py-20 md:py-32 pt-24 overflow-hidden bg-gradient-to-b from-[#0f172a] to-[#1e293b]">
       {/* Grid Pattern Background */}
@@ -36,24 +34,24 @@ function Hero({ onNavigate }: HeroProps) {
             </h2>
             {/* Description */}
             <p className="text-sm md:text-base text-[#94a3b8] mb-8 max-w-xl leading-relaxed">
-              Individual borrow and supply details stay hidden from MEV bots and competitors with built-in selective reveal for KYC, KYT, AML, and Travel Rule requirements.
+              Sensitive collateral values, borrowing exposure, and health factors stay fully private. Selective reveal supports seamless KYC, KYT, AML, and Travel Rule compliance.
             </p>
-
             {/* CTA Buttons */}
             <div className="flex flex-col sm:flex-row gap-4 mb-12">
-              <button
-                onClick={() => onNavigate('/board')}
-                className="px-8 py-4 bg-[#3eddfd] text-[#0f172a] font-semibold rounded-lg transition-all hover:bg-[#2dd4d4] hover:shadow-[0_0_30px_rgba(62,223,223,0.4)] hover:-translate-y-0.5"
+              <Link
+                to="/dashboard"
+                className="px-8 py-4 bg-[#3eddfd] text-[#0f172a] font-semibold rounded-lg transition-all hover:bg-[#2dd4d4] hover:shadow-[0_0_30px_rgba(62,223,223,0.4)] hover:-translate-y-0.5 text-center"
               >
-                Deploy Capital
-              </button>
-              <button
-                onClick={() => onNavigate('/deploy-agent')}
-                className="px-8 py-4 bg-[#1e293b] text-[#3eddfd] font-semibold rounded-lg transition-all hover:bg-[#334155] hover:shadow-[0_0_20px_rgba(62,223,223,0.2)] border border-[#3eddfd]/30"
+                Get Started
+              </Link>
+              <Link
+                to="/ask-ai"
+                className="px-8 py-4 bg-[#1e293b] text-[#3eddfd] font-semibold rounded-lg transition-all hover:bg-[#334155] hover:shadow-[0_0_20px_rgba(62,223,223,0.2)] border border-[#3eddfd]/30 text-center"
               >
-                Get Your Credential
-              </button>
+                Ask AI
+              </Link>
             </div>
+ +++++++ REPLACE
 
             {/* Trust Indicators */}
             {/*<div className="flex flex-wrap gap-8">
