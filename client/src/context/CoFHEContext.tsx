@@ -37,7 +37,7 @@ export function CoFHEProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
-  // Connect when wallet is connected
+  // Connect to CoFHE when wallet is connected
   const connect = useCallback(async () => {
     if (!client || !wagmiPublicClient || !wagmiWalletClient) {
       setError(new Error('Wallet or CoFHE client not available'));
@@ -50,27 +50,27 @@ export function CoFHEProvider({ children }: { children: React.ReactNode }) {
     setError(null);
 
     try {
-      // Create permit for the account
-      if (address) {
-        await client.permits.getOrCreateSelfPermit();
-      }
 
       await client.connect(wagmiPublicClient, wagmiWalletClient);
+      
       setConnected(true);
+      setError(null);
     } catch (err) {
       setError(err instanceof Error ? err : new Error('Failed to connect to CoFHE'));
       setConnected(false);
     } finally {
       setConnecting(false);
     }
-  }, [client, wagmiPublicClient, wagmiWalletClient, connected, address]);
+  }, [client, wagmiPublicClient, wagmiWalletClient, connected]);
 
   // Disconnect
   const disconnect = useCallback(() => {
     if (!client) return;
 
     try {
-      client.disconnect();
+      if (client.connected) {
+        client.disconnect();
+      }
       setConnected(false);
       setError(null);
     } catch (err) {
@@ -78,14 +78,17 @@ export function CoFHEProvider({ children }: { children: React.ReactNode }) {
     }
   }, [client]);
 
-  // Auto-connect when wallet connects
+  // Auto-connect when wallet connects on Sepolia
   useEffect(() => {
-    if (isConnected && address && chain?.id === 11155111) {
-      connect();
-    } else if (!isConnected) {
+    if (isConnected && address && chain?.id === 11155111 && client) {
+      // Only connect if not already connected or connecting
+      if (!connected && !connecting) {
+        connect();
+      }
+    } else if (!isConnected && connected) {
       disconnect();
     }
-  }, [isConnected, address, chain?.id, connect, disconnect]);
+  }, [isConnected, address, chain?.id, connect, disconnect, client, connected, connecting]);
 
   const value: CoFHEContextValue = {
     client,
