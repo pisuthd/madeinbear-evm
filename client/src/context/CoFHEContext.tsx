@@ -7,6 +7,7 @@ interface CoFHEContextValue {
   client: ReturnType<typeof createCofheClient> | null;
   connected: boolean;
   connecting: boolean;
+  permitReady: boolean;
   error: Error | null;
   connect: () => Promise<void>;
   disconnect: () => void;
@@ -18,6 +19,7 @@ export function CoFHEProvider({ children }: { children: React.ReactNode }) {
   const [client, setClient] = useState<ReturnType<typeof createCofheClient> | null>(null);
   const [connected, setConnected] = useState(false);
   const [connecting, setConnecting] = useState(false);
+  const [permitReady, setPermitReady] = useState(false);
   const [error, setError] = useState<Error | null>(null);
   
   const { isConnected, address, chain } = useAccount();
@@ -50,14 +52,20 @@ export function CoFHEProvider({ children }: { children: React.ReactNode }) {
     setError(null);
 
     try {
-
       await client.connect(wagmiPublicClient, wagmiWalletClient);
+      
+      // Create or get the permit after connecting
+      const permit = await client.permits.getOrCreateSelfPermit();
+      if (permit) {
+        setPermitReady(true);
+      }
       
       setConnected(true);
       setError(null);
     } catch (err) {
       setError(err instanceof Error ? err : new Error('Failed to connect to CoFHE'));
       setConnected(false);
+      setPermitReady(false);
     } finally {
       setConnecting(false);
     }
@@ -72,6 +80,7 @@ export function CoFHEProvider({ children }: { children: React.ReactNode }) {
         client.disconnect();
       }
       setConnected(false);
+      setPermitReady(false);
       setError(null);
     } catch (err) {
       setError(err instanceof Error ? err : new Error('Failed to disconnect from CoFHE'));
@@ -94,6 +103,7 @@ export function CoFHEProvider({ children }: { children: React.ReactNode }) {
     client,
     connected,
     connecting,
+    permitReady,
     error,
     connect,
     disconnect,

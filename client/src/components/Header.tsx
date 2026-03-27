@@ -23,7 +23,7 @@ function Header() {
             MadeInBear
           </Link>
 
-          <div className="hidden md:flex items-center gap-8">
+          <div className="hidden ml-4 md:flex items-center gap-8">
             {navItems.map((item) => (
               <Link
                 key={item.path}

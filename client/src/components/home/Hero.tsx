@@ -61,7 +61,7 @@ function Hero() {
                 Deploy Capital
               </Link>
               <Link
-                to="/ask-ai"
+                to="/credentials"
                 className="px-8 py-4 bg-[#1e293b] text-[#3eddfd] font-semibold rounded-lg transition-all hover:bg-[#334155] hover:shadow-[0_0_20px_rgba(62,223,223,0.2)] border border-[#3eddfd]/30 text-center"
               >
                 Get Your Credential

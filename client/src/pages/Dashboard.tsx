@@ -1,9 +1,13 @@
 import { useState } from 'react';
 import { useAccount } from 'wagmi';
 import MockTokenFaucet from '../components/MockTokenFaucet';
+import WalletBalances from '../components/portfolio/WalletBalances';
+import SupplyPositions from '../components/portfolio/SupplyPositions';
+import BorrowPositions from '../components/portfolio/BorrowPositions';
+import MarketsTable from '../components/markets/MarketsTable';
 
 function Dashboard() {
-  const [activeTab, setActiveTab] = useState('faucet');
+  const [activeTab, setActiveTab] = useState('markets');
   const { isConnected } = useAccount();
 
   const tabs = [
@@ -61,7 +65,7 @@ function Dashboard() {
           </div>
           <h2 className="text-3xl font-bold text-[#f8fafc] mb-4">Connect Your Wallet</h2>
           <p className="text-[#94a3b8] text-lg mb-8 max-w-lg">
-            Please connect your wallet to access the Dashboard
+            Connect your wallet to Sepolia Testnet to access test tokens, wrap functionality, and more
           </p>
         </div>
       );
@@ -71,33 +75,13 @@ function Dashboard() {
       case 'faucet':
         return <MockTokenFaucet />;
       case 'markets':
-        return (
-          <div className="space-y-6">
-            <div className="text-center py-16">
-              <div className="w-24 h-24 mx-auto mb-6 rounded-2xl bg-[#3eddfd]/5 flex items-center justify-center border border-[#3eddfd]/20">
-                <svg className="w-12 h-12 text-[#3eddfd]/60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z" />
-                </svg>
-              </div>
-              <h3 className="text-2xl font-bold text-[#f8fafc] mb-3">Markets</h3>
-              <p className="text-[#94a3b8] text-lg">Discover & interact with permissioned lending pools</p>
-              <p className="text-[#64748b] text-sm mt-4">Content coming soon...</p>
-            </div>
-          </div>
-        );
+        return <MarketsTable />;
       case 'portfolio':
         return (
           <div className="space-y-6">
-            <div className="text-center py-16">
-              <div className="w-24 h-24 mx-auto mb-6 rounded-2xl bg-[#3eddfd]/5 flex items-center justify-center border border-[#3eddfd]/20">
-                <svg className="w-12 h-12 text-[#3eddfd]/60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-                </svg>
-              </div>
-              <h3 className="text-2xl font-bold text-[#f8fafc] mb-3">My Portfolio</h3>
-              <p className="text-[#94a3b8] text-lg">Private positions & health overview</p>
-              <p className="text-[#64748b] text-sm mt-4">Content coming soon...</p>
-            </div>
+            <WalletBalances />
+            <SupplyPositions />
+            <BorrowPositions />
           </div>
         );
       case 'wrap':
