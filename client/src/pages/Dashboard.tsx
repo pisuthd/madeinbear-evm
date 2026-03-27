@@ -1,12 +1,17 @@
 import { useState } from 'react';
+import { useAccount } from 'wagmi';
+import MockTokenFaucet from '../components/MockTokenFaucet';
 
 function Dashboard() {
-  const [activeTab, setActiveTab] = useState('markets');
+  const [activeTab, setActiveTab] = useState('faucet');
+  const { isConnected } = useAccount();
 
   const tabs = [
+   
     {
       id: 'markets',
       title: 'Markets',
+      subtitle: 'Discover permissioned lending pools',
       icon: (
         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z" />
@@ -16,15 +21,27 @@ function Dashboard() {
     {
       id: 'portfolio',
       title: 'My Portfolio',
+      subtitle: 'Private positions & health overview',
       icon: (
         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
         </svg>
       ),
     },
+     {
+      id: 'faucet',
+      title: 'Faucet',
+      subtitle: 'Get test tokens for testing',
+      icon: (
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+      ),
+    },
     {
       id: 'wrap',
       title: 'Wrap / Unwrap',
+      subtitle: 'Convert ERC-20 to Confidential Tokens',
       icon: (
         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
@@ -33,125 +50,128 @@ function Dashboard() {
     },
   ];
 
-  return (
-    <div className="max-w-7xl mx-auto px-4 md:px-8 py-12 pt-24">
-      {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-4xl md:text-5xl font-bold mb-4 text-[#f8fafc] tracking-tight">
-          Dashboard
-        </h1>
-        <p className="text-lg text-[#cbd5e1]">
-          Monitor your agents, balances, and financial activity
-        </p>
-      </div>
+  const renderContent = () => {
+    if (!isConnected) {
+      return (
+        <div className="w-full h-full min-h-[600px] flex flex-col items-center justify-center text-center">
+          <div className="w-32 h-32 mx-auto mb-8 rounded-full bg-[#3eddfd]/5 flex items-center justify-center border border-[#3eddfd]/20">
+            <svg className="w-16 h-16 text-[#3eddfd]/60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+            </svg>
+          </div>
+          <h2 className="text-3xl font-bold text-[#f8fafc] mb-4">Connect Your Wallet</h2>
+          <p className="text-[#94a3b8] text-lg mb-8 max-w-lg">
+            Please connect your wallet to access the Dashboard
+          </p>
+        </div>
+      );
+    }
 
-      {/* Tabbed Layout */}
-      <div className="grid md:grid-cols-12 gap-6">
-        {/* Left Side - Vertical Tabs */}
-        <div className="md:col-span-4 lg:col-span-3">
-          <div className="flex flex-col gap-2">
+    switch (activeTab) {
+      case 'faucet':
+        return <MockTokenFaucet />;
+      case 'markets':
+        return (
+          <div className="space-y-6">
+            <div className="text-center py-16">
+              <div className="w-24 h-24 mx-auto mb-6 rounded-2xl bg-[#3eddfd]/5 flex items-center justify-center border border-[#3eddfd]/20">
+                <svg className="w-12 h-12 text-[#3eddfd]/60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z" />
+                </svg>
+              </div>
+              <h3 className="text-2xl font-bold text-[#f8fafc] mb-3">Markets</h3>
+              <p className="text-[#94a3b8] text-lg">Discover & interact with permissioned lending pools</p>
+              <p className="text-[#64748b] text-sm mt-4">Content coming soon...</p>
+            </div>
+          </div>
+        );
+      case 'portfolio':
+        return (
+          <div className="space-y-6">
+            <div className="text-center py-16">
+              <div className="w-24 h-24 mx-auto mb-6 rounded-2xl bg-[#3eddfd]/5 flex items-center justify-center border border-[#3eddfd]/20">
+                <svg className="w-12 h-12 text-[#3eddfd]/60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                </svg>
+              </div>
+              <h3 className="text-2xl font-bold text-[#f8fafc] mb-3">My Portfolio</h3>
+              <p className="text-[#94a3b8] text-lg">Private positions & health overview</p>
+              <p className="text-[#64748b] text-sm mt-4">Content coming soon...</p>
+            </div>
+          </div>
+        );
+      case 'wrap':
+        return (
+          <div className="space-y-6">
+            <div className="text-center py-16">
+              <div className="w-24 h-24 mx-auto mb-6 rounded-2xl bg-[#3eddfd]/5 flex items-center justify-center border border-[#3eddfd]/20">
+                <svg className="w-12 h-12 text-[#3eddfd]/60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+                </svg>
+              </div>
+              <h3 className="text-2xl font-bold text-[#f8fafc] mb-3">Wrap / Unwrap</h3>
+              <p className="text-[#94a3b8] text-lg">Convert ERC-20 to Confidential Tokens</p>
+              <p className="text-[#64748b] text-sm mt-4">Content coming soon...</p>
+            </div>
+          </div>
+        );
+      default:
+        return null;
+    }
+  };
+
+  return (
+    <div className="w-full px-4 md:px-8 py-12 pt-24">
+      {/* Split Layout: Sidebar + Content */}
+      <div className="flex flex-col md:flex-row gap-6">
+        {/* Left Sidebar - Table Style Tabs (Always Visible) */}
+        <div className="w-full md:w-80 flex-shrink-0">
+          <div className="bg-[#1e293b]/50 border border-[#3eddfd]/10 rounded-lg overflow-hidden">
+            {/* Table Header */}
+            <div className="bg-[#0f172a] px-4 py-3 border-b border-[#3eddfd]/10">
+              <span className="text-sm font-medium text-[#3eddfd]">Dashboard</span>
+            </div>
+            
+            {/* Table Rows */}
             {tabs.map((tab) => (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`flex items-center gap-4 px-5 py-4 rounded-xl transition-all duration-300 text-left border ${
+                className={`w-full px-4 py-5 border-b border-[#3eddfd]/10 transition-all duration-200 text-left flex items-center gap-4 last:border-b-0 ${
                   activeTab === tab.id
-                    ? 'bg-[#3eddfd]/10 border-[#3eddfd]/40 shadow-[0_0_20px_rgba(62,223,223,0.15)]'
-                    : 'bg-[#1e293b]/50 border-[#3eddfd]/10 hover:border-[#3eddfd]/30 hover:bg-[#1e293b]'
+                    ? 'bg-[#3eddfd]/10 border-l-4 border-l-[#3eddfd]'
+                    : 'bg-transparent hover:bg-[#1e293b] border-l-4 border-l-transparent'
                 }`}
               >
-                {/* Tab Icon */}
-                <div className={`flex-shrink-0 w-12 h-12 rounded-lg flex items-center justify-center transition-colors ${
+                {/* Icon Cell */}
+                <div className={`flex-shrink-0 w-10 h-10 rounded flex items-center justify-center transition-colors ${
                   activeTab === tab.id ? 'bg-[#3eddfd]/20 text-[#3eddfd]' : 'bg-[#3eddfd]/5 text-[#3eddfd]/60'
                 }`}>
                   {tab.icon}
                 </div>
                 
-                {/* Tab Title */}
-                <span className={`font-medium transition-colors ${
-                  activeTab === tab.id ? 'text-[#f8fafc]' : 'text-[#94a3b8]'
-                }`}>
-                  {tab.title}
-                </span>
-
-                {/* Active Indicator */}
-                {activeTab === tab.id && (
-                  <div className="ml-auto">
-                    <svg className="w-5 h-5 text-[#3eddfd]" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
-                    </svg>
+                {/* Text Content Cell */}
+                <div className="flex-1 min-w-0">
+                  <div className={`font-medium text-base mb-1 ${
+                    activeTab === tab.id ? 'text-[#f8fafc]' : 'text-[#cbd5e1]'
+                  }`}>
+                    {tab.title}
                   </div>
-                )}
+                  <div className={`text-xs leading-relaxed ${
+                    activeTab === tab.id ? 'text-[#3eddfd]' : 'text-[#94a3b8]'
+                  }`}>
+                    {tab.subtitle}
+                  </div>
+                </div>
               </button>
             ))}
           </div>
         </div>
 
-        {/* Right Side - Content Area */}
-        <div className="md:col-span-8 lg:col-span-9">
-          <div className="bg-[#1e293b]/50 backdrop-blur-sm rounded-2xl border border-[#3eddfd]/10 p-6 md:p-8 min-h-[500px]">
-            {activeTab === 'markets' && (
-              <div className="space-y-6">
-                <div className="flex items-center gap-3 mb-6">
-                  <div className="w-12 h-12 rounded-xl bg-[#3eddfd]/10 flex items-center justify-center border border-[#3eddfd]/20">
-                    <svg className="w-6 h-6 text-[#3eddfd]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z" />
-                    </svg>
-                  </div>
-                  <h2 className="text-2xl font-bold text-[#f8fafc]">Markets</h2>
-                </div>
-                <div className="text-center py-12">
-                  <div className="w-20 h-20 mx-auto mb-4 rounded-2xl bg-[#3eddfd]/5 flex items-center justify-center border border-[#3eddfd]/10">
-                    <svg className="w-10 h-10 text-[#3eddfd]/40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z" />
-                    </svg>
-                  </div>
-                  <p className="text-[#94a3b8] text-lg">Markets content placeholder</p>
-                </div>
-              </div>
-            )}
-
-            {activeTab === 'portfolio' && (
-              <div className="space-y-6">
-                <div className="flex items-center gap-3 mb-6">
-                  <div className="w-12 h-12 rounded-xl bg-[#3eddfd]/10 flex items-center justify-center border border-[#3eddfd]/20">
-                    <svg className="w-6 h-6 text-[#3eddfd]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-                    </svg>
-                  </div>
-                  <h2 className="text-2xl font-bold text-[#f8fafc]">My Portfolio</h2>
-                </div>
-                <div className="text-center py-12">
-                  <div className="w-20 h-20 mx-auto mb-4 rounded-2xl bg-[#3eddfd]/5 flex items-center justify-center border border-[#3eddfd]/10">
-                    <svg className="w-10 h-10 text-[#3eddfd]/40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-                    </svg>
-                  </div>
-                  <p className="text-[#94a3b8] text-lg">My Portfolio content placeholder</p>
-                </div>
-              </div>
-            )}
-
-            {activeTab === 'wrap' && (
-              <div className="space-y-6">
-                <div className="flex items-center gap-3 mb-6">
-                  <div className="w-12 h-12 rounded-xl bg-[#3eddfd]/10 flex items-center justify-center border border-[#3eddfd]/20">
-                    <svg className="w-6 h-6 text-[#3eddfd]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
-                    </svg>
-                  </div>
-                  <h2 className="text-2xl font-bold text-[#f8fafc]">Wrap / Unwrap</h2>
-                </div>
-                <div className="text-center py-12">
-                  <div className="w-20 h-20 mx-auto mb-4 rounded-2xl bg-[#3eddfd]/5 flex items-center justify-center border border-[#3eddfd]/10">
-                    <svg className="w-10 h-10 text-[#3eddfd]/40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
-                    </svg>
-                  </div>
-                  <p className="text-[#94a3b8] text-lg">Wrap / Unwrap content placeholder</p>
-                </div>
-              </div>
-            )}
+        {/* Right Side - Content Area (Shows Connect Wallet or Tab Content) */}
+        <div className="flex-1 min-w-0">
+          <div className="w-full bg-[#1e293b]/50 backdrop-blur-sm border border-[#3eddfd]/10 rounded-lg p-6 md:p-8 min-h-[600px]">
+            {renderContent()}
           </div>
         </div>
       </div>

@@ -1,130 +1,123 @@
 import { useState } from 'react';
 
 function KeyFeatures() {
-  const [activeIndex, setActiveIndex] = useState(0);
+  const [activeTab, setActiveTab] = useState(0);
 
   const features = [
     {
-      title: "Fully Private Positions",
-      description: "Collateral values, borrowing exposure, and health factors stay encrypted with Fhenix FHE, protected from MEV and external visibility.",
       icon: (
-        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
         </svg>
       ),
+      title: "Fully Private Positions",
+      description: "Sensitive collateral values, borrowing exposure, and health factors stay fully encrypted with Fhenix Fully Homomorphic Encryption. Protected from MEV bots, competitors, and external visibility."
     },
     {
+      icon: (
+        <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+        </svg>
+      ),
       title: "On-Chain Credential System",
-      description: "On-chain credentials for verified access, enabling seamless KYC, KYT, AML, and Travel Rule compliance through selective reveal.",
-      icon: (
-        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2" />
-        </svg>
-      ),
+      description: "Built-in on-chain credentials for verified access, enabling seamless KYC, KYT, AML, and Travel Rule compliance through selective reveal and attestations."
     },
     {
-      title: "Intelligent AI Assistant",
-      description: "Personalized onboarding guidance and tailored borrowing recommendations designed specifically for institutional users.",
       icon: (
-        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+        <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
         </svg>
       ),
-    },
+      title: "Intelligent AI Assistant",
+      description: "Personalized onboarding guidance and tailored borrowing recommendations designed specifically for institutional users."
+    }
   ];
 
-  const activeFeature = features[activeIndex];
-
   return (
-    <section className="py-20 px-4 md:px-8 bg-gradient-to-b from-[#1e293b] to-[#0f172a]">
-      <div className="max-w-7xl mx-auto">
+    <section className="relative py-20 md:py-32 px-4 md:px-8 bg-[#0f172a]">
+      {/* Grid Pattern Background */}
+      <div className="absolute inset-0 pointer-events-none opacity-[0.05]">
+        <div className="absolute inset-0" style={{
+          backgroundImage: `
+            linear-gradient(rgba(62, 223, 223, 0.1) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(62, 223, 223, 0.1) 1px, transparent 1px)
+          `,
+          backgroundSize: '50px 50px'
+        }} />
+      </div>
+
+      {/* Gradient Orbs */}
+      <div className="absolute top-1/4 left-0 w-96 h-96 bg-[#3eddfd]/5 rounded-full blur-3xl" />
+      <div className="absolute bottom-1/4 right-0 w-96 h-96 bg-[#3eddfd]/5 rounded-full blur-3xl" />
+
+      <div className="max-w-7xl mx-auto w-full relative z-10">
         {/* Section Header */}
         <div className="text-center mb-16">
-          <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold mb-4 text-[#f8fafc]">
+          <h2 className="text-3xl md:text-4xl lg:text-[48px] font-bold mb-4 text-[#f8fafc] tracking-tight">
             Key Features
           </h2>
-          <p className="text-lg md:text-xl text-[#94a3b8] max-w-2xl mx-auto">
-            Enterprise-Grade Privacy Meets Institutional DeFi
-          </p>
+          <div className="w-24 h-1 bg-gradient-to-r from-[#3eddfd] to-transparent mx-auto" />
         </div>
 
-        {/* Tabbed Layout */}
+        {/* Sidebar Tabs Layout */}
         <div className="grid md:grid-cols-12 gap-8">
-          {/* Left Side - Vertical Tabs */}
+          {/* Sidebar - Navigation Tabs */}
           <div className="md:col-span-4 lg:col-span-3">
-            <div className="flex flex-col gap-2">
+            <div className="sticky top-8 space-y-2">
               {features.map((feature, index) => (
                 <button
                   key={index}
-                  onClick={() => setActiveIndex(index)}
-                  className={`flex items-center gap-4 px-5 py-4 rounded-xl transition-all duration-300 text-left border ${
-                    activeIndex === index
-                      ? 'bg-[#3eddfd]/10 border-[#3eddfd]/40 shadow-[0_0_20px_rgba(62,223,223,0.15)]'
-                      : 'bg-[#1e293b]/50 border-[#3eddfd]/10 hover:border-[#3eddfd]/30 hover:bg-[#1e293b]'
+                  onClick={() => setActiveTab(index)}
+                  className={`w-full text-left px-6 py-4 rounded-xl transition-all duration-300 border ${
+                    activeTab === index
+                      ? 'bg-gradient-to-r from-[#3eddfd]/20 to-[#3eddfd]/5 border-[#3eddfd]/50 shadow-[0_0_20px_rgba(62,223,223,0.2)]'
+                      : 'bg-[#1e293b] border-[#334155] hover:border-[#3eddfd]/30 hover:bg-[#1e293b]/80'
                   }`}
                 >
-                  {/* Tab Icon */}
-                  <div className={`flex-shrink-0 w-12 h-12 rounded-lg flex items-center justify-center transition-colors ${
-                    activeIndex === index ? 'bg-[#3eddfd]/20 text-[#3eddfd]' : 'bg-[#3eddfd]/5 text-[#3eddfd]/60'
-                  }`}>
-                    {feature.icon}
-                  </div>
-                  
-                  {/* Tab Title */}
-                  <span className={`font-medium transition-colors ${
-                    activeIndex === index ? 'text-[#f8fafc]' : 'text-[#94a3b8]'
-                  }`}>
-                    {feature.title}
-                  </span>
-
-                  {/* Active Indicator */}
-                  {activeIndex === index && (
-                    <div className="ml-auto">
-                      <svg className="w-5 h-5 text-[#3eddfd]" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
-                      </svg>
+                  <div className="flex items-center gap-3">
+                    <div className={`transition-colors duration-300 ${
+                      activeTab === index ? 'text-[#3eddfd]' : 'text-[#94a3b8]'
+                    }`}>
+                      {feature.icon}
                     </div>
-                  )}
+                    <span className={`font-semibold transition-colors duration-300 ${
+                      activeTab === index ? 'text-[#f8fafc]' : 'text-[#94a3b8]'
+                    }`}>
+                      {feature.title}
+                    </span>
+                  </div>
                 </button>
               ))}
             </div>
           </div>
 
-          {/* Right Side - Content Area */}
+          {/* Content Area */}
           <div className="md:col-span-8 lg:col-span-9">
-            <div className="h-full bg-[#1e293b]/50 backdrop-blur-sm rounded-2xl border border-[#3eddfd]/10 p-8 md:p-12">
-              {/* Icon */}
-              <div className="mb-8 flex justify-center md:justify-start">
-                <div className="w-20 h-20 rounded-2xl bg-[#3eddfd]/10 flex items-center justify-center border border-[#3eddfd]/20 shadow-[0_0_30px_rgba(62,223,223,0.1)]">
+            <div className="bg-gradient-to-br from-[#1e293b] to-[#0f172a] border border-[#3eddfd]/10 rounded-2xl p-8 md:p-12 min-h-[400px] transition-all duration-500 hover:border-[#3eddfd]/20">
+              <div className="animate-in fade-in slide-in-from-right-4 duration-500">
+                {/* Active Feature Icon */}
+                <div className="w-20 h-20 bg-[#3eddfd]/10 rounded-2xl flex items-center justify-center mb-8">
                   <div className="text-[#3eddfd]">
-                    {activeFeature.icon}
+                    {features[activeTab].icon}
                   </div>
                 </div>
-              </div>
 
-              {/* Title */}
-              <h3 className="text-2xl md:text-3xl font-bold mb-6 text-[#f8fafc]">
-                {activeFeature.title}
-              </h3>
+                {/* Active Feature Title */}
+                <h3 className="text-2xl md:text-3xl lg:text-4xl font-bold mb-6 text-[#f8fafc]">
+                  {features[activeTab].title}
+                </h3>
+                
+                {/* Active Feature Description */}
+                <p className="text-lg text-[#94a3b8] leading-relaxed max-w-3xl">
+                  {features[activeTab].description}
+                </p>
 
-              {/* Description */}
-              <p className="text-base md:text-lg text-[#94a3b8] leading-relaxed mb-8">
-                {activeFeature.description}
-              </p>
-
-              {/* Feature Highlights (Optional decorative elements) */}
-              <div className="flex flex-wrap gap-4">
-                <div className="flex items-center gap-2 text-sm text-[#3eddfd]/80">
-                  <div className="w-2 h-2 rounded-full bg-[#3eddfd]" />
-                  <span>FHE-Powered</span>
-                </div>
-                <div className="flex items-center gap-2 text-sm text-[#3eddfd]/80">
-                  <div className="w-2 h-2 rounded-full bg-[#3eddfd]" />
-                  <span>Institutional-Grade</span>
-                </div>
-                <div className="flex items-center gap-2 text-sm text-[#3eddfd]/80">
-                  <div className="w-2 h-2 rounded-full bg-[#3eddfd]" />
-                  <span>Compliant</span>
+                {/* Decorative Elements */}
+                <div className="mt-8 pt-8 border-t border-[#334155]/50">
+                  <div className="flex items-center gap-2 text-[#3eddfd] text-sm font-medium">
+                    <div className="w-2 h-2 bg-[#3eddfd] rounded-full animate-pulse" />
+                    <span>Feature {activeTab + 1} of {features.length}</span>
+                  </div>
                 </div>
               </div>
             </div>

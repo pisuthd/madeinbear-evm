@@ -3,7 +3,7 @@ import { sepolia } from 'wagmi/chains';
 
 export const config = getDefaultConfig({
   appName: 'MadeInBear',
-  projectId: 'YOUR_WALLETCONNECT_PROJECT_ID', // Replace with your WalletConnect project ID
+  projectId: 'WALLETCONNECT_PROJECT_ID', 
   chains: [sepolia],
-  ssr: true, // Set to false if your app does not use server-side rendering
+  ssr: true, 
 });
