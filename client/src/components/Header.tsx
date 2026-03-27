@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { ConnectButton } from '@rainbow-me/rainbowkit';
 
 function Header() {
   const navItems: { label: string; path: string }[] = [
@@ -31,12 +32,7 @@ function Header() {
         </div>
 
         <div className="flex items-center">
-          <Link
-            to="/dashboard"
-            className="px-6 py-2.5 bg-[#3eddfd] text-[#0f172a] font-semibold rounded-lg transition-all hover:bg-[#2dd4d4] hover:shadow-[0_0_20px_rgba(62,223,223,0.3)]"
-          >
-            Get Started
-          </Link>
+          <ConnectButton />
         </div>
       </nav>
     </header>

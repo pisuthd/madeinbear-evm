@@ -15,6 +15,22 @@ function Hero() {
       </div>
 
       <div className="max-w-7xl mx-auto w-full relative z-10">
+       
+        {/* <div className="mb-8 max-w-2xl mx-auto">
+          <div className="bg-gradient-to-r from-[#3eddfd]/10 to-[#3eddfd]/5 border border-[#3eddfd]/30 rounded-xl px-6 py-4 flex items-start gap-4">
+            <div className="flex-shrink-0 ">
+              <svg className="w-5 h-5 text-[#3eddfd]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <div className="flex-1"> 
+              <p className="text-sm  text-[#94a3b8]">
+                MadeInBear is in early development and currently live on <span className="text-[#3eddfd] font-medium">Sepolia Testnet</span>.
+              </p>
+            </div>
+          </div>
+        </div> */}
+
         <div className="grid md:grid-cols-2 gap-12 items-center">
           {/* Left Content */}
           <div className="text-left">
@@ -37,41 +53,20 @@ function Hero() {
               Sensitive collateral values, borrowing exposure, and health factors stay fully private. Selective reveal supports seamless KYC, KYT, AML, and Travel Rule compliance.
             </p>
             {/* CTA Buttons */}
-            <div className="flex flex-col sm:flex-row gap-4 mb-12">
+            <div className="flex flex-col sm:flex-row gap-4 mb-12"> 
               <Link
                 to="/dashboard"
                 className="px-8 py-4 bg-[#3eddfd] text-[#0f172a] font-semibold rounded-lg transition-all hover:bg-[#2dd4d4] hover:shadow-[0_0_30px_rgba(62,223,223,0.4)] hover:-translate-y-0.5 text-center"
               >
-                Get Started
+                Deploy Capital
               </Link>
               <Link
                 to="/ask-ai"
                 className="px-8 py-4 bg-[#1e293b] text-[#3eddfd] font-semibold rounded-lg transition-all hover:bg-[#334155] hover:shadow-[0_0_20px_rgba(62,223,223,0.2)] border border-[#3eddfd]/30 text-center"
               >
-                Ask AI
+                Get Your Credential
               </Link>
             </div>
- +++++++ REPLACE
-
-            {/* Trust Indicators */}
-            {/*<div className="flex flex-wrap gap-8">
-              <div className="flex items-center gap-2 text-sm text-[#cbd5e1]">
-                <div className="w-8 h-8 rounded-lg bg-[#3eddfd]/10 flex items-center justify-center border border-[#3eddfd]/20">
-                  <svg className="w-4 h-4 text-[#3eddfd]" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                  </svg>
-                </div>
-                <span>FHE-Enabled <span className="text-[#3eddfd] font-semibold">Lending Protocol</span></span>
-              </div>
-              <div className="flex items-center gap-2 text-sm text-[#cbd5e1]">
-                <div className="w-8 h-8 rounded-lg bg-[#3eddfd]/10 flex items-center justify-center border border-[#3eddfd]/20">
-                  <svg className="w-4 h-4 text-[#3eddfd]" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                  </svg>
-                </div>
-                <span>On-Chain <span className="text-[#3eddfd] font-semibold">Verified Access</span></span>
-              </div>
-            </div>*/}
 
           </div>
 
