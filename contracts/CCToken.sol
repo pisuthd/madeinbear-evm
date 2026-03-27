@@ -45,8 +45,6 @@ contract ConfidentialCCToken is ICCToken {
 
     // ===== CONSTANTS =====
     
-    euint64 public ZERO;
-    
     
     // ===== Errors =====
     
@@ -68,21 +66,6 @@ contract ConfidentialCCToken is ICCToken {
         underlying = _underlying;
         comptroller = _comptroller;
         oracle = _oracle;
-        
-        // Create encrypted constants
-        ZERO = FHE.asEuint64(0);
-        
-        // Initialize totals
-        totalSupplied = FHE.asEuint64(0);
-        totalBorrows = FHE.asEuint64(0);
-        
-        // Grant contract access to constants
-        FHE.allowThis(ZERO);
-        FHE.allowThis(totalSupplied);
-        FHE.allowThis(totalBorrows);
-
-        FHE.allowPublic(totalSupplied);
-        FHE.allowPublic(totalBorrows);
     }
     
     // ===== CORE FUNCTIONS =====
@@ -169,7 +152,7 @@ contract ConfidentialCCToken is ICCToken {
         euint64 cTokenReturn = FHE.select(
             canWithdraw,
             amount,
-            ZERO
+            FHE.asEuint64(0)
         );
         FHE.allowSender(cTokenReturn);
         
@@ -245,7 +228,7 @@ contract ConfidentialCCToken is ICCToken {
         euint64 newBorrowed = FHE.select(
             canRepayFull,
             FHE.sub(userBorrowed, amount),
-            ZERO
+            FHE.asEuint64(0)
         );
         
         borrowed[msg.sender] = newBorrowed;

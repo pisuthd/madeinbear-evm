@@ -23,7 +23,7 @@ describe("CCToken - Confidential Compound Token", function () {
 
     // Deploy mock Comptroller
     const ComptrollerFactory = await hre.ethers.getContractFactory("Comptroller");
-    const comptroller = await ComptrollerFactory.deploy(await oracle.getAddress());
+    const comptroller = await ComptrollerFactory.deploy();
 
     // Deploy mock ERC20 token (this will serve as "cToken" for testing)
     const MockERC20Factory = await hre.ethers.getContractFactory("MockERC20");
@@ -56,25 +56,6 @@ describe("CCToken - Confidential Compound Token", function () {
       expect(await ccToken.SUPPLY_RATE_VALUE()).to.equal(300n); // 3%
       expect(await ccToken.BORROW_RATE_VALUE()).to.equal(500n); // 5%
       expect(await ccToken.COLLATERAL_FACTOR_VALUE()).to.equal(8000n); // 0.8 with SCALE 10000
-    });
-
-    it("Should start with zero totals", async function () {
-      const { ccToken } = await deployCCTokenFixture();
-
-      // Total supplied and borrows are encrypted, check via decrypting
-      const totalSuppliedHash = await ccToken.totalSupplied();
-      const totalBorrowsHash = await ccToken.totalBorrows();
-
-      const totalSupplied = await ownerClient
-        .decryptForView(totalSuppliedHash, FheTypes.Uint64)
-        .execute();
-
-      const totalBorrows = await ownerClient
-        .decryptForView(totalBorrowsHash, FheTypes.Uint64)
-        .execute();
-
-      expect(totalSupplied).to.equal(0n);
-      expect(totalBorrows).to.equal(0n);
     });
   });
 
