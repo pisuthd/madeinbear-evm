@@ -44,9 +44,6 @@ contract ConfidentialCCToken is ICCToken {
     /// @notice User's borrowed cToken amount
     mapping(address => euint64) private borrowed;
     
-    /// @notice Backend relayer used to decrypt encrypted data on behalf of users since decryptForView() is not working in React
-    address public constant TRUSTED_DECRYPTOR = 0x91C65f404714Ac389b38335CccA4A876a8669d32;
-    
     // ===== Errors =====
     
     error ZeroAddress();
@@ -90,8 +87,7 @@ contract ConfidentialCCToken is ICCToken {
         
         // Grant access to new balance
         FHE.allowThis(ccTokenBalance[msg.sender]);
-        FHE.allowSender(ccTokenBalance[msg.sender]);
-        FHE.allow(ccTokenBalance[msg.sender], TRUSTED_DECRYPTOR);
+        FHE.allowSender(ccTokenBalance[msg.sender]); 
         
         // Emit event
         emit Supply(msg.sender, euint64.unwrap(amount), euint64.unwrap(amount));
@@ -100,64 +96,28 @@ contract ConfidentialCCToken is ICCToken {
     /**
      * @notice Withdraw supplied cToken from the protocol
      * @param ccTokenAmount Encrypted amount of ccToken to burn
-     * @dev Must maintain collateral ratio after withdrawal (1:1)
+     * @dev Simple withdrawal - subtract from user's balance
      */
     function withdraw(InEuint64 calldata ccTokenAmount) external override {
-        
         euint64 amount = FHE.asEuint64(ccTokenAmount);
         FHE.allowThis(amount);
         
-        // Check: user has enough ccToken
         euint64 userBalance = ccTokenBalance[msg.sender];
-        ebool sufficientBalance = FHE.gte(userBalance, amount);
         
-        // Check collateral: newSupplied * COLLATERAL_FACTOR / SCALE >= userBorrowed
-        euint64 supplied = getSupplied();
-        euint64 userBorrowed = borrowed[msg.sender];
-        
-        // Calculate new supplied after withdrawal
-        euint64 newSupplied = FHE.sub(supplied, amount);
-        
-        // Check: newSupplied * COLLATERAL_FACTOR >= userBorrowed * SCALE
-        // Equivalent to: newSupplied * 0.8 >= userBorrowed
-        euint64 encryptedCollateralFactor = FHE.asEuint64(COLLATERAL_FACTOR_VALUE);
-        euint64 maxBorrow = FHE.div(FHE.mul(newSupplied, encryptedCollateralFactor), FHE.asEuint64(10000));
-        ebool sufficientCollateral = FHE.gte(maxBorrow, userBorrowed);
-        
-        // Only allow withdrawal if both conditions are met
-        ebool canWithdraw = FHE.and(sufficientBalance, sufficientCollateral);
-        
-        // Update balance if can withdraw, else revert
-        euint64 newBalance = FHE.select(
-            canWithdraw,
-            FHE.sub(userBalance, amount),
-            userBalance
-        );
+        // Simple subtraction - no collateral checks
+        euint64 newBalance = FHE.sub(userBalance, amount);
         
         ccTokenBalance[msg.sender] = newBalance;
         FHE.allowThis(ccTokenBalance[msg.sender]);
         FHE.allowSender(ccTokenBalance[msg.sender]);
-        FHE.allow(ccTokenBalance[msg.sender], TRUSTED_DECRYPTOR);
         
         // Update total supplied
-        totalSupplied = FHE.select(
-            canWithdraw,
-            FHE.sub(totalSupplied, amount),
-            totalSupplied
-        );
+        totalSupplied = FHE.sub(totalSupplied, amount);
         FHE.allowThis(totalSupplied);
         FHE.allowPublic(totalSupplied);
         
-        // Return the cToken amount (1:1)
-        euint64 cTokenReturn = FHE.select(
-            canWithdraw,
-            amount,
-            FHE.asEuint64(0)
-        ); 
-        
         // Emit event
-        emit Withdraw(msg.sender, euint64.unwrap(amount), euint64.unwrap(cTokenReturn));
-
+        emit Withdraw(msg.sender, euint64.unwrap(amount), euint64.unwrap(amount));
     }
     
     /**
@@ -169,39 +129,15 @@ contract ConfidentialCCToken is ICCToken {
         euint64 amount = FHE.asEuint64(cTokenAmount);
         FHE.allowThis(amount);
         
-        // Get user's supplied amount
-        euint64 supplied = getSupplied();
-        euint64 userBorrowed = borrowed[msg.sender];
-        
-        // Check: supplied * COLLATERAL_FACTOR >= (userBorrowed + newBorrow) * SCALE
-        // SCALE is 10000, COLLATERAL_FACTOR is 8000 (80%)
-        // Equivalent to: supplied * 0.8 >= userBorrowed + newBorrow
-        euint64 newBorrow = FHE.add(userBorrowed, amount);
-        euint64 encryptedCollateralFactor = FHE.asEuint64(COLLATERAL_FACTOR_VALUE);
-        euint64 maxBorrow = FHE.div(FHE.mul(supplied, encryptedCollateralFactor), FHE.asEuint64(10000));
-        ebool sufficientCollateral = FHE.gte(maxBorrow, newBorrow);
-        
-        // Only borrow if sufficient collateral
-        euint64 newBorrowed = FHE.select(
-            sufficientCollateral,
-            newBorrow,
-            userBorrowed
-        );
-        
-        // Update user's borrowed balance
-        borrowed[msg.sender] = newBorrowed;
-        
+        // Update user's borrowed balance 
+        borrowed[msg.sender] = FHE.add(borrowed[msg.sender], amount);
+
         // Grant access
         FHE.allowThis(borrowed[msg.sender]);
-        FHE.allowSender(borrowed[msg.sender]);
-        FHE.allow(borrowed[msg.sender], TRUSTED_DECRYPTOR);
+        FHE.allowSender(borrowed[msg.sender]); 
         
-        // Update total borrows
-        totalBorrows = FHE.select(
-            sufficientCollateral,
-            FHE.add(totalBorrows, amount),
-            totalBorrows
-        );
+        // Update total borrows - FIX: Store the result
+        totalBorrows = FHE.add(totalBorrows, amount);
         FHE.allowThis(totalBorrows);
         FHE.allowPublic(totalBorrows);
         
@@ -212,37 +148,25 @@ contract ConfidentialCCToken is ICCToken {
     /**
      * @notice Repay borrowed cToken
      * @param cTokenAmount Encrypted amount of cToken to repay
+     * @dev Simple repayment - subtract from borrowed amount
      */
-    function repay(InEuint64 calldata cTokenAmount) external override { 
-        
+    function repay(InEuint64 calldata cTokenAmount) external override {
         euint64 amount = FHE.asEuint64(cTokenAmount);
         FHE.allowThis(amount);
-
+        
         euint64 userBorrowed = borrowed[msg.sender];
         
-        // Check: amount <= borrowed
-        ebool canRepayFull = FHE.gte(userBorrowed, amount);
-        
-        // New borrowed balance
-        euint64 newBorrowed = FHE.select(
-            canRepayFull,
-            FHE.sub(userBorrowed, amount),
-            FHE.asEuint64(0)
-        );
+        // Simple subtraction - no over-repayment check
+        euint64 newBorrowed = FHE.sub(userBorrowed, amount);
         
         borrowed[msg.sender] = newBorrowed;
         
         // Grant access
         FHE.allowThis(borrowed[msg.sender]);
-        FHE.allowSender(borrowed[msg.sender]);
-        FHE.allow(borrowed[msg.sender], TRUSTED_DECRYPTOR);
+        FHE.allowSender(borrowed[msg.sender]); 
         
         // Update total borrows
-        totalBorrows = FHE.select(
-            canRepayFull,
-            FHE.sub(totalBorrows, amount),
-            totalBorrows
-        );
+        totalBorrows = FHE.sub(totalBorrows, amount);
         FHE.allowThis(totalBorrows);
         FHE.allowPublic(totalBorrows);
         

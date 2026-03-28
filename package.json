@@ -9,6 +9,8 @@
 		"postinstall": "patch-package",
 		"deploy-compound": "hardhat deploy-compound",
 		"eth-sepolia:deploy-compound": "hardhat deploy-compound --network eth-sepolia",
+		"deploy-ctoken": "hardhat deploy-ctoken",
+		"eth-sepolia:deploy-ctoken": "hardhat deploy-ctoken --network eth-sepolia",
 		"--------------": "",
 		" --- cofhe ---": "",
 		"  --------------": "",

@@ -10,9 +10,7 @@ import "@fhenixprotocol/cofhe-contracts/FHE.sol";
  */
 interface ICCToken {
     // ===== Public State (Plaintext) =====
-    
-     
-    
+
     /// @notice Supply rate: 3% (scaled by 10000)
     function SUPPLY_RATE_VALUE() external pure returns (uint64);
     
@@ -36,11 +34,10 @@ interface ICCToken {
     
     /**
      * @notice Withdraw supplied cToken from the protocol
-     * @param ccTokenAmount Encrypted amount of ccToken to burn
-     * @return Encrypted amount of cToken to return to user
+     * @param ccTokenAmount Encrypted amount of ccToken to burn 
      * @dev Must maintain collateral ratio after withdrawal
      */
-    function withdraw(InEuint64 calldata ccTokenAmount) external returns (euint64);
+    function withdraw(InEuint64 calldata ccTokenAmount) external;
     
     /**
      * @notice Borrow cToken from the protocol
