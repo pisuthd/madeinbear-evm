@@ -1,8 +1,6 @@
-import { useState, useEffect } from 'react';
-import { usePositions, useWithdraw } from '../../hooks/useCCToken';
-import { useCoFHE } from '../../context/CoFHEContext';
-import { getAllMarkets, DEPLOYMENTS } from '../../constants/deployments';
-import { usePublicClient } from 'wagmi';
+import { useState } from 'react';
+import { useWithdraw } from '../../hooks/useCCToken'; 
+import type { MarketPosition } from '../../hooks/useCCToken';
 
 interface SupplyPosition {
   token: string;
@@ -15,44 +13,18 @@ interface SupplyPosition {
   supplyAPY: number;
 }
 
-export default function SupplyPositions() {
-  const publicClient = usePublicClient();
-  const { connected } = useCoFHE();
-  const { positions, fetchPositions, loading } = usePositions();
+interface SupplyPositionsProps {
+  positions: MarketPosition[];
+  onReload: () => Promise<void>;
+}
+
+export default function SupplyPositions({ positions, onReload }: SupplyPositionsProps) {
+
   const { withdraw, loading: withdrawLoading } = useWithdraw();
   const [withdrawAmounts, setWithdrawAmounts] = useState<Record<string, string>>({});
   const [withdrawing, setWithdrawing] = useState<Record<string, boolean>>({});
 
-  useEffect(() => {
-    if (!connected || !publicClient) return;
-
-    const loadPositions = async () => {
-      try {
-        const chainId = await publicClient.getChainId();
-        const deployment = DEPLOYMENTS[chainId as keyof typeof DEPLOYMENTS];
-        const marketAddresses = getAllMarkets(chainId);
-
-        const markets = marketAddresses.map((address) => {
-          const isWETH = address.toLowerCase() === deployment.ccWETH.toLowerCase();
-          return {
-            address,
-            symbol: isWETH ? 'ccWETH' : 'ccUSDT',
-            icon: isWETH ? '⟠' : '₮',
-            decimals: 18,
-            price: isWETH ? 3500 : 1,
-          };
-        });
-
-        await fetchPositions(markets);
-      } catch (error) {
-        console.error('Failed to load positions:', error);
-      }
-    };
-
-    loadPositions();
-  }, [connected, publicClient, fetchPositions]);
-
-  const supplyPositions: SupplyPosition[] = positions.map((pos) => ({
+  const supplyPositions: SupplyPosition[] = positions.filter((pos) => pos.supplyBalance && pos.supplyBalance > 0n).map((pos) => ({
     ...pos,
     supplyAPY: 3, // 3% supply APY
   }));
@@ -82,20 +54,7 @@ export default function SupplyPositions() {
       await withdraw(position.address, amount);
       setWithdrawAmounts((prev) => ({ ...prev, [position.address]: '' }));
       // Reload positions after withdrawal
-      const chainId = await publicClient!.getChainId();
-      const deployment = DEPLOYMENTS[chainId as keyof typeof DEPLOYMENTS];
-      const marketAddresses = getAllMarkets(chainId);
-      const markets = marketAddresses.map((address) => {
-        const isWETH = address.toLowerCase() === deployment.ccWETH.toLowerCase();
-        return {
-          address,
-          symbol: isWETH ? 'ccWETH' : 'ccUSDT',
-          icon: isWETH ? '⟠' : '₮',
-          decimals: 18,
-          price: isWETH ? 3500 : 1,
-        };
-      });
-      await fetchPositions(markets);
+      await onReload();
     } catch (error) {
       console.error('Withdraw failed:', error);
       alert('Withdraw failed. Please try again.');
@@ -103,15 +62,6 @@ export default function SupplyPositions() {
       setWithdrawing((prev) => ({ ...prev, [position.address]: false }));
     }
   };
-
-  if (loading) {
-    return (
-      <div className="bg-[#1e293b]/50 backdrop-blur-sm border border-[#3eddfd]/10 rounded-lg p-6">
-        <h3 className="text-xl font-semibold text-[#f8fafc] mb-4">Supply Positions</h3>
-        <div className="text-center py-8 text-[#94a3b8]">Loading positions...</div>
-      </div>
-    );
-  }
 
   return (
     <div className="bg-[#1e293b]/50 backdrop-blur-sm border border-[#3eddfd]/10 rounded-lg p-6">

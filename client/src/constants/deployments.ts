@@ -7,16 +7,16 @@
 export const DEPLOYMENTS = {
   11155111: { // Sepolia
     // Underlying tokens
-    WETH: '0x4C143F18881a1D75c3458df023802f129a590Dc3',
-    USDT: '0x1e94972F3EEc3848297e9c9ad84a4f8aB7AC55EE',
+    WETH: '0xF834024dF747196803368523E1677328fD50415f',
+    USDT: '0x2a003dd5ceFCA17767b103963C34fBD8d1E81dC9',
     
     // Protocol contracts
-    Oracle: '0x3dd3B893fb992E59A6536AF01C496F52aD897F9f',
-    Comptroller: '0x9286e7a1f66b6f99dB85A345117a330ED5ED79F1',
+    Oracle: '0x4D64291037dCB365bc240CC49f232fCca8033c50',
+    Comptroller: '0xf97d1232496D311aEBB30860998d0dEB79893c46',
     
-    // Confidential cTokens
-    ccWETH: '0x707628799Dc723285391950eEF4a2778DFF4a902',
-    ccUSDT: '0x489e403Bc8D3Eb681240E991ae2Cf672F93e843C',
+    // Market cTokens
+    ccWETH: '0x9123Fe9BE015b8562Bb91933D028D9aba9d2fF54',
+    ccUSDT: '0x37Dd2f6335EF90272141156153EC879CDb8E3bB7',
   },
 } as const;
 
@@ -32,19 +32,19 @@ export function isChainSupported(chainId: number): chainId is ChainId {
 
 // Market metadata
 export const MARKET_METADATA = {
-  '0x707628799Dc723285391950eEF4a2778DFF4a902': { // ccWETH
+  '0x9123Fe9BE015b8562Bb91933D028D9aba9d2fF54': { // ccWETH
     symbol: 'ccWETH',
     name: 'Confidential Wrapped ETH',
     underlying: 'WETH',
-    underlyingAddress: '0x4C143F18881a1D75c3458df023802f129a590Dc3',
+    underlyingAddress: '0xF834024dF747196803368523E1677328fD50415f',
     decimals: 18,
     icon: '⟠',
   },
-  '0x489e403Bc8D3Eb681240E991ae2Cf672F93e843C': { // ccUSDT
+  '0x37Dd2f6335EF90272141156153EC879CDb8E3bB7': { // ccUSDT
     symbol: 'ccUSDT',
     name: 'Confidential USDT',
     underlying: 'USDT',
-    underlyingAddress: '0x1e94972F3EEc3848297e9c9ad84a4f8aB7AC55EE',
+    underlyingAddress: '0x2a003dd5ceFCA17767b103963C34fBD8d1E81dC9',
     decimals: 18,
     icon: '₮',
   },

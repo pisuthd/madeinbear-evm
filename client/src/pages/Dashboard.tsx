@@ -1,14 +1,47 @@
-import { useState } from 'react';
-import { useAccount } from 'wagmi';
+import { useState, useCallback } from 'react';
+import { useAccount, usePublicClient } from 'wagmi';
 import MockTokenFaucet from '../components/MockTokenFaucet';
 import WalletBalances from '../components/portfolio/WalletBalances';
 import SupplyPositions from '../components/portfolio/SupplyPositions';
 import BorrowPositions from '../components/portfolio/BorrowPositions';
 import MarketsTable from '../components/markets/MarketsTable';
+import { usePositions } from '../hooks/useCCToken';
+import { getAllMarkets, DEPLOYMENTS } from '../constants/deployments';
+import { useCoFHE } from '../context/CoFHEContext';
 
 function Dashboard() {
   const [activeTab, setActiveTab] = useState('markets');
   const { isConnected } = useAccount();
+  const publicClient = usePublicClient();
+  const { connected } = useCoFHE();
+  const { positions, fetchPositions, loading } = usePositions();
+  const [hasLoaded, setHasLoaded] = useState(false);
+
+  const loadPositions = useCallback(async () => {
+    if (!connected || !publicClient) return;
+
+    try {
+      const chainId = await publicClient.getChainId();
+      const deployment = DEPLOYMENTS[chainId as keyof typeof DEPLOYMENTS];
+      const marketAddresses = getAllMarkets(chainId);
+
+      const markets = marketAddresses.map((address) => {
+        const isWETH = address.toLowerCase() === deployment.ccWETH.toLowerCase();
+        return {
+          address,
+          symbol: isWETH ? 'ccWETH' : 'ccUSDT',
+          icon: isWETH ? '⟠' : '₮',
+          decimals: 18,
+          price: isWETH ? 3500 : 1,
+        };
+      });
+
+      await fetchPositions(markets);
+      setHasLoaded(true);
+    } catch (error) {
+      console.error('Failed to load positions:', error);
+    }
+  }, [connected, publicClient, fetchPositions]);
 
   const tabs = [
    
@@ -80,8 +113,35 @@ function Dashboard() {
         return (
           <div className="space-y-6">
             <WalletBalances />
-            <SupplyPositions />
-            <BorrowPositions />
+            
+            {/* Load Private Positions Button */}
+            <div className=" ">
+              <div className="flex items-center justify-between">
+                
+                <button
+                  onClick={loadPositions}
+                  disabled={loading || !connected}
+                  className="px-6 py-3 bg-[#3eddfd] text-[#0f172a] font-semibold rounded-lg text-sm hover:bg-[#3eddfd]/80 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                >
+                  {loading ? (
+                    <>
+                      <svg className="animate-spin h-5 w-5 text-[#0f172a]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      Loading...
+                    </>
+                  ) : (
+                    <>
+                      {hasLoaded ? 'Load Private Positions Again' : 'Load Private Positions'}
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+
+            <SupplyPositions positions={positions} onReload={loadPositions} />
+            <BorrowPositions positions={positions} onReload={loadPositions} />
           </div>
         );
       case 'wrap':

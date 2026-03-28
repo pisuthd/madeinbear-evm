@@ -10,7 +10,7 @@ interface MarketRowProps {
   onBorrow: (market: any) => void;
 }
 
-function MarketRow({ market, index, onSupply, onBorrow }: MarketRowProps) {
+function MarketRow({ market, onSupply, onBorrow }: MarketRowProps) {
   const { data: marketData, loading } = useMarketData(market.address);
 
   const formatAmount = (amount: bigint, decimals: number) => {
@@ -40,10 +40,7 @@ function MarketRow({ market, index, onSupply, onBorrow }: MarketRowProps) {
       </td>
       <td className="px-6 py-4">
         <div className="text-[#f59e0b] font-semibold">5.00%</div>
-      </td>
-      <td className="px-6 py-4">
-        <div className="text-[#94a3b8]">80%</div>
-      </td>
+      </td> 
       <td className="px-6 py-4">
         {loading ? (
           <div className="text-[#94a3b8]">Loading...</div>
@@ -126,10 +123,7 @@ export default function MarketsTable() {
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-semibold text-[#94a3b8] uppercase tracking-wider">
                   Borrow APY
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-semibold text-[#94a3b8] uppercase tracking-wider">
-                  Collateral Factor
-                </th>
+                </th> 
                 <th className="px-6 py-3 text-left text-xs font-semibold text-[#94a3b8] uppercase tracking-wider">
                   Total Supplied
                 </th>

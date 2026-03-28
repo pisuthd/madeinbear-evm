@@ -97,11 +97,11 @@ export default function BorrowModal({ market, onClose, onSuccess }: BorrowModalP
           </div>
 
           {/* Warning */}
-          <div className="p-3 bg-yellow-500/10 border border-yellow-500/20 rounded-lg">
+          {/* <div className="p-3 bg-yellow-500/10 border border-yellow-500/20 rounded-lg">
             <p className="text-xs text-yellow-400">
               ⚠️ Ensure you maintain sufficient collateral to avoid liquidation. If health factor falls below 1, your position may be liquidated.
             </p>
-          </div>
+          </div> */}
 
           {/* Error Message */}
           {error && (

@@ -1,8 +1,6 @@
-import { useState, useEffect } from 'react';
-import { usePositions, useRepay } from '../../hooks/useCCToken';
-import { useCoFHE } from '../../context/CoFHEContext';
-import { getAllMarkets, DEPLOYMENTS } from '../../constants/deployments';
-import { usePublicClient } from 'wagmi';
+import { useState } from 'react';
+import { useRepay } from '../../hooks/useCCToken';
+import type { MarketPosition } from '../../hooks/useCCToken';
 
 interface BorrowPosition {
   token: string;
@@ -15,42 +13,17 @@ interface BorrowPosition {
   borrowAPY: number;
 }
 
-export default function BorrowPositions() {
-  const publicClient = usePublicClient();
-  const { connected } = useCoFHE();
-  const { positions, fetchPositions, loading } = usePositions();
+interface BorrowPositionsProps {
+  positions: MarketPosition[];
+  onReload: () => Promise<void>;
+}
+
+export default function BorrowPositions({ positions, onReload }: BorrowPositionsProps) {
+
+
   const { repay, loading: repayLoading } = useRepay();
   const [repayAmounts, setRepayAmounts] = useState<Record<string, string>>({});
   const [repaying, setRepaying] = useState<Record<string, boolean>>({});
-
-  useEffect(() => {
-    if (!connected || !publicClient) return;
-
-    const loadPositions = async () => {
-      try {
-        const chainId = await publicClient.getChainId();
-        const deployment = DEPLOYMENTS[chainId as keyof typeof DEPLOYMENTS];
-        const marketAddresses = getAllMarkets(chainId);
-
-        const markets = marketAddresses.map((address) => {
-          const isWETH = address.toLowerCase() === deployment.ccWETH.toLowerCase();
-          return {
-            address,
-            symbol: isWETH ? 'ccWETH' : 'ccUSDT',
-            icon: isWETH ? '⟠' : '₮',
-            decimals: 18,
-            price: isWETH ? 3500 : 1,
-          };
-        });
-
-        await fetchPositions(markets);
-      } catch (error) {
-        console.error('Failed to load positions:', error);
-      }
-    };
-
-    loadPositions();
-  }, [connected, publicClient, fetchPositions]);
 
   const borrowPositions: BorrowPosition[] = positions.map((pos) => ({
     ...pos,
@@ -82,20 +55,7 @@ export default function BorrowPositions() {
       await repay(position.address, amount);
       setRepayAmounts((prev) => ({ ...prev, [position.address]: '' }));
       // Reload positions after repayment
-      const chainId = await publicClient!.getChainId();
-      const deployment = DEPLOYMENTS[chainId as keyof typeof DEPLOYMENTS];
-      const marketAddresses = getAllMarkets(chainId);
-      const markets = marketAddresses.map((address) => {
-        const isWETH = address.toLowerCase() === deployment.ccWETH.toLowerCase();
-        return {
-          address,
-          symbol: isWETH ? 'ccWETH' : 'ccUSDT',
-          icon: isWETH ? '⟠' : '₮',
-          decimals: 18,
-          price: isWETH ? 3500 : 1,
-        };
-      });
-      await fetchPositions(markets);
+      await onReload();
     } catch (error) {
       console.error('Repay failed:', error);
       alert('Repay failed. Please try again.');
@@ -103,15 +63,6 @@ export default function BorrowPositions() {
       setRepaying((prev) => ({ ...prev, [position.address]: false }));
     }
   };
-
-  if (loading) {
-    return (
-      <div className="bg-[#1e293b]/50 backdrop-blur-sm border border-[#3eddfd]/10 rounded-lg p-6">
-        <h3 className="text-xl font-semibold text-[#f8fafc] mb-4">Borrow Positions</h3>
-        <div className="text-center py-8 text-[#94a3b8]">Loading positions...</div>
-      </div>
-    );
-  }
 
   return (
     <div className="bg-[#1e293b]/50 backdrop-blur-sm border border-[#3eddfd]/10 rounded-lg p-6">

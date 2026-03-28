@@ -1,39 +1,44 @@
 import { defineConfig } from 'vite'
 import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react'
+import wasm from 'vite-plugin-wasm'
+import topLevelAwait from 'vite-plugin-top-level-await'
 
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [
     react(),
-    tailwindcss()
+    tailwindcss(),
+    wasm(),
+    topLevelAwait()
   ],
-  optimizeDeps: {
-    // Force inclusion of problematic packages to pre-bundle them correctly
-    include: ['iframe-shared-storage'],
-    // Exclude CoFHE SDK from optimization as it has WASM
-    exclude: ['@cofhe/sdk/web']
-  },
-  resolve: {
-    alias: {
-      // Ensure iframe-shared-storage uses the correct entry point
-      'iframe-shared-storage': 'iframe-shared-storage/dist/index.js'
-    }
+  server: {
+    port: 3000,
+    headers: {
+      // Use 'credentialless' instead of 'require-corp' to allow external images
+      // while still enabling SharedArrayBuffer for WASM
+      'Cross-Origin-Embedder-Policy': 'credentialless',
+      'Cross-Origin-Opener-Policy': 'same-origin',
+    },
   },
   build: {
-    // Ensure WASM files are properly handled
-    assetsInlineLimit: 0,
-    // Don't bundle WASM
-    rollupOptions: {
-      output: {
-        // Ensure WASM files are not bundled
-        assetFileNames: (assetInfo) => {
-          if (assetInfo.name === 'tfhe.wasm') {
-            return 'assets/wasm/[name].[hash][extname]'
-          }
-          return 'assets/[name].[hash][extname]'
-        }
-      }
-    }
-  }
+    outDir: 'dist',
+  },
+  // Optimize dependency handling for TFHE
+  optimizeDeps: {
+    exclude: ['tfhe'], // Don't pre-bundle tfhe to preserve WASM loading
+    esbuildOptions: {
+      target: 'esnext', // Ensure modern JS features for WASM
+    },
+  },
+  // Handle WASM files as assets
+  assetsInclude: ['**/*.wasm'],
+  // Define for proper WASM loading
+  define: {
+    global: 'globalThis',
+  },
+  // Worker configuration for WASM
+  worker: {
+    format: 'es',
+  },
 })

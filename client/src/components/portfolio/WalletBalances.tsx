@@ -1,19 +1,20 @@
 import {  useAccount } from 'wagmi';
 import { useReadContract } from 'wagmi';
 import { erc20Abi } from 'viem';
+import { DEPLOYMENTS } from '../../constants/deployments';
 
 const TOKENS = [
   {
     symbol: 'WETH',
     name: 'Wrapped ETH',
-    address: '0x4C143F18881a1D75c3458df023802f129a590Dc3' as const,
+    address: DEPLOYMENTS[11155111].WETH as `0x${string}`,
     decimals: 18,
     icon: '⟠',
   },
   {
     symbol: 'USDT',
     name: 'Tether USD',
-    address: '0x1e94972F3EEc3848297e9c9ad84a4f8aB7AC55EE' as const,
+    address: DEPLOYMENTS[11155111].USDT as `0x${string}`,
     decimals: 18,
     icon: '₮',
   },

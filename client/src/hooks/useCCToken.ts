@@ -184,45 +184,45 @@ export function useWithdraw() {
   return { withdraw, loading: state.loading, error: state.error };
 }
 
-export function useBalance() {
-  const { address } = useAccount();
-  const { client, connected } = useCoFHE();
-  const [balance, setBalance] = useState<bigint | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<Error | null>(null);
+// export function useBalance() {
+//   const { address } = useAccount();
+//   const { client, connected } = useCoFHE();
+//   const [balance, setBalance] = useState<bigint | null>(null);
+//   const [loading, setLoading] = useState(false);
+//   const [error, setError] = useState<Error | null>(null);
 
-  const fetchBalance = useCallback(async (contractAddress: string) => {
-    if (!address || !client || !connected) {
-      throw new Error('Wallet or CoFHE not connected');
-    }
+//   const fetchBalance = useCallback(async (contractAddress: string) => {
+//     if (!address || !client || !connected) {
+//       throw new Error('Wallet or CoFHE not connected');
+//     }
 
-    setLoading(true);
-    setError(null);
+//     setLoading(true);
+//     setError(null);
 
-    try {
-      // Get the encrypted balance from the contract
-      // Note: This is a placeholder since we need the actual read contract hook
-      // In a real implementation, you would use useReadContract or readContract
-      const ctHash = '0x' + '0'.repeat(64) as `0x${string}`;
+//     try {
+//       // Get the encrypted balance from the contract
+//       // Note: This is a placeholder since we need the actual read contract hook
+//       // In a real implementation, you would use useReadContract or readContract
+//       const ctHash = '0x' + '0'.repeat(64) as `0x${string}`;
 
-      // Decrypt the balance
-      const decryptedBalance = await client
-        .decryptForView(ctHash, FheTypes.Uint64)
-        .execute();
+//       // Decrypt the balance
+//       const decryptedBalance = await client
+//         .decryptForView(ctHash, FheTypes.Uint64)
+//         .execute();
 
-      setBalance(decryptedBalance);
-      return decryptedBalance;
-    } catch (err) {
-      const error = err instanceof Error ? err : new Error('Failed to fetch balance');
-      setError(error);
-      throw error;
-    } finally {
-      setLoading(false);
-    }
-  }, [address, client, connected]);
+//       setBalance(decryptedBalance);
+//       return decryptedBalance;
+//     } catch (err) {
+//       const error = err instanceof Error ? err : new Error('Failed to fetch balance');
+//       setError(error);
+//       throw error;
+//     } finally {
+//       setLoading(false);
+//     }
+//   }, [address, client, connected]);
 
-  return { balance, fetchBalance, loading, error };
-}
+//   return { balance, fetchBalance, loading, error };
+// }
 
 export function useBorrowed() {
   const { address } = useAccount();
@@ -306,6 +306,7 @@ export function usePositions() {
             abi: CCTokenABI,
             functionName: 'getCCTokenBalance',
             args: [],
+            account: address
           }) as `0x${string}`;
 
           // Get encrypted borrow balance
@@ -314,16 +315,27 @@ export function usePositions() {
             abi: CCTokenABI,
             functionName: 'getBorrowed',
             args: [],
+            account: address
           }) as `0x${string}`;
+
+          const permit = await client.permits.getOrCreateSelfPermit();
 
           // Decrypt balances
           const supplyBalance = await client
             .decryptForView(supplyCtHash, FheTypes.Uint64)
+            .withPermit(permit)
             .execute();
 
-          const borrowBalance = await client
-            .decryptForView(borrowCtHash, FheTypes.Uint64)
-            .execute();
+          let borrowBalance = BigInt(0)
+
+          try {
+            borrowBalance = await client
+              .decryptForView(borrowCtHash, FheTypes.Uint64)
+              .withPermit(permit)
+              .execute();
+          } catch (e) {
+
+          }
 
           results.push({
             token: market.symbol.startsWith('cc') ? market.symbol.slice(2) : market.symbol,

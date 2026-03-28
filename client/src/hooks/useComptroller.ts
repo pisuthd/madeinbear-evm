@@ -1,5 +1,5 @@
 import { useCallback, useState, useEffect } from 'react';
-import { usePublicClient, useAccount } from 'wagmi';
+import { usePublicClient } from 'wagmi';
 import { useCoFHE } from '../context/CoFHEContext';
 import { DEPLOYMENTS, getAllMarkets, isChainSupported } from '../constants/deployments';
 
@@ -16,6 +16,8 @@ export function useMarkets() {
   const publicClient = usePublicClient();
   const { connected } = useCoFHE();
   const [markets, setMarkets] = useState<MarketInfo[]>([]);
+ 
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
 
@@ -37,22 +39,13 @@ export function useMarkets() {
       const deployment = DEPLOYMENTS[chainId as keyof typeof DEPLOYMENTS];
       const marketAddresses = getAllMarkets(chainId);
 
-      // Get market list from Comptroller
-      // In a real implementation, you would do something like:
-      // const comptroller = getContract({
-      //   address: deployment.Comptroller,
-      //   abi: ComptrollerABI,
-      //   publicClient,
-      // });
-      // const marketList = await comptroller.read.getAllMarkets();
-
       // For now, we'll use the deployment addresses
       const marketsList: MarketInfo[] = marketAddresses.map((address) => ({
         address,
         symbol: address === deployment.ccWETH ? 'ccWETH' : 'ccUSDT',
         name: address === deployment.ccWETH ? 'Confidential Wrapped ETH' : 'Confidential USDT',
         underlying: address === deployment.ccWETH ? 'WETH' : 'USDT',
-        decimals: address === deployment.ccWETH ? 18 : 6,
+        decimals: address === deployment.ccWETH ? 18 : 18,
         icon: address === deployment.ccWETH ? '⟠' : '₮',
       }));
 

@@ -1,5 +1,6 @@
 import { useCallback, useState } from 'react';
 import { useWriteContract, usePublicClient } from 'wagmi';
+import { DEPLOYMENTS } from '../constants/deployments';
 
 // Minimal ABI for minting mock tokens
 const MOCK_ERC20_ABI = [
@@ -73,7 +74,7 @@ export function useWETHFaucet() {
     amount: bigint = BigInt(10) * BigInt(10 ** 18) // Default 10 WETH
   ) => {
     return mintTokens(
-      '0x4C143F18881a1D75c3458df023802f129a590Dc3' as `0x${string}`,
+      DEPLOYMENTS[11155111].WETH as `0x${string}`,
       amount,
       recipientAddress
     );
@@ -90,7 +91,7 @@ export function useUSDTFaucet() {
     amount: bigint = BigInt(10000) * BigInt(10 ** 18) // Default 10,000 USDT
   ) => {
     return mintTokens(
-      '0x1e94972F3EEc3848297e9c9ad84a4f8aB7AC55EE' as `0x${string}`,
+      DEPLOYMENTS[11155111].USDT as `0x${string}`,
       amount,
       recipientAddress
     );
