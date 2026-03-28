@@ -9,14 +9,14 @@ const TOKENS = [
     name: 'Wrapped ETH',
     address: DEPLOYMENTS[11155111].WETH as `0x${string}`,
     decimals: 18,
-    icon: '⟠',
+    icon: 'https://s2.coinmarketcap.com/static/img/coins/64x64/1027.png',
   },
   {
     symbol: 'USDT',
     name: 'Tether USD',
     address: DEPLOYMENTS[11155111].USDT as `0x${string}`,
     decimals: 18,
-    icon: '₮',
+    icon: 'https://s2.coinmarketcap.com/static/img/coins/64x64/825.png',
   },
 ];
 
@@ -106,9 +106,7 @@ export default function WalletBalances() {
               <tr key={token.symbol} className="border-b border-[#3eddfd]/10 hover:bg-[#0f172a]/50 transition-colors">
                 <td className="py-4 px-4">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-[#0f172a] flex items-center justify-center border border-[#3eddfd]/20">
-                      <span className="text-[#3eddfd] text-lg">{token.icon}</span>
-                    </div>
+                    <img src={token.icon} alt={token.symbol} className="w-10 h-10 rounded-full" />
                     <div>
                       <div className="font-medium text-[#f8fafc]">{token.name}</div>
                       <div className="text-xs text-[#94a3b8]">{token.symbol}</div>

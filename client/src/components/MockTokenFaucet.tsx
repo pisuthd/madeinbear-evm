@@ -64,9 +64,7 @@ function MockTokenFaucet() {
 
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-[#627eea] rounded-full flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-[#627eea]/30">
-                ⟠
-              </div>
+              <img src="https://s2.coinmarketcap.com/static/img/coins/64x64/1027.png" alt="WETH" className="w-12 h-12 rounded-full" />
               <div>
                 <p className="font-bold text-[#f8fafc] text-lg">WETH</p>
                 <p className="text-sm text-[#94a3b8]">Wrapped ETH</p>
@@ -107,9 +105,7 @@ function MockTokenFaucet() {
 
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-[#26a17b] rounded-full flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-[#26a17b]/30">
-                ₮
-              </div>
+              <img src="https://s2.coinmarketcap.com/static/img/coins/64x64/825.png" alt="USDT" className="w-12 h-12 rounded-full" />
               <div>
                 <p className="font-bold text-[#f8fafc] text-lg">USDT</p>
                 <p className="text-sm text-[#94a3b8]">Tether USD</p>

@@ -30,7 +30,7 @@ function Dashboard() {
         return {
           address,
           symbol: isWETH ? 'ccWETH' : 'ccUSDT',
-          icon: isWETH ? '⟠' : '₮',
+          icon: isWETH ? 'https://s2.coinmarketcap.com/static/img/coins/64x64/1027.png' : 'https://s2.coinmarketcap.com/static/img/coins/64x64/825.png',
           decimals: 18,
           price: isWETH ? 3500 : 1,
         };

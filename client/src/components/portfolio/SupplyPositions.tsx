@@ -89,9 +89,7 @@ export default function SupplyPositions({ positions, onReload }: SupplyPositions
                 <tr key={position.address} className="border-b border-[#3eddfd]/10 hover:bg-[#0f172a]/50 transition-colors">
                   <td className="py-4 px-4">
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-[#0f172a] flex items-center justify-center border border-[#3eddfd]/20">
-                        <span className="text-[#3eddfd] text-lg">{position.icon}</span>
-                      </div>
+                      <img src={position.icon} alt={position.symbol} className="w-10 h-10 rounded-full" />
                       <div>
                         <div className="font-medium text-[#f8fafc]">{position.symbol}</div>
                         <div className="text-xs text-[#94a3b8]">{position.token}</div>

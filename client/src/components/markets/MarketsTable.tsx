@@ -26,9 +26,7 @@ function MarketRow({ market, onSupply, onBorrow }: MarketRowProps) {
     <tr className="border-b border-[#3eddfd]/10 hover:bg-[#3eddfd]/5 transition-colors">
       <td className="px-6 py-4">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-[#3eddfd]/10 flex items-center justify-center text-xl font-bold text-[#3eddfd]">
-            {market.icon}
-          </div>
+          <img src={market.icon} alt={market.symbol} className="w-10 h-10 rounded-full" />
           <div>
             <div className="font-semibold text-[#f8fafc]">{market.symbol}</div>
             <div className="text-xs text-[#94a3b8]">{market.name}</div>

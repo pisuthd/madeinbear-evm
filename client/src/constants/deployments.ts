@@ -38,7 +38,7 @@ export const MARKET_METADATA = {
     underlying: 'WETH',
     underlyingAddress: '0xF834024dF747196803368523E1677328fD50415f',
     decimals: 18,
-    icon: '⟠',
+    icon: 'https://s2.coinmarketcap.com/static/img/coins/64x64/1027.png',
   },
   '0x37Dd2f6335EF90272141156153EC879CDb8E3bB7': { // ccUSDT
     symbol: 'ccUSDT',
@@ -46,7 +46,7 @@ export const MARKET_METADATA = {
     underlying: 'USDT',
     underlyingAddress: '0x2a003dd5ceFCA17767b103963C34fBD8d1E81dC9',
     decimals: 18,
-    icon: '₮',
+    icon: 'https://s2.coinmarketcap.com/static/img/coins/64x64/825.png',
   },
 } as const;
 

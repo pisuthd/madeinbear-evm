@@ -46,7 +46,7 @@ export function useMarkets() {
         name: address === deployment.ccWETH ? 'Confidential Wrapped ETH' : 'Confidential USDT',
         underlying: address === deployment.ccWETH ? 'WETH' : 'USDT',
         decimals: address === deployment.ccWETH ? 18 : 18,
-        icon: address === deployment.ccWETH ? '⟠' : '₮',
+        icon: address === deployment.ccWETH ? 'https://s2.coinmarketcap.com/static/img/coins/64x64/1027.png' : 'https://s2.coinmarketcap.com/static/img/coins/64x64/825.png',
       }));
 
       setMarkets(marketsList);
@@ -126,7 +126,7 @@ export function useIsMarket(address: string) {
 
 export function useMarketData(marketAddress: string) {
   const publicClient = usePublicClient();
-  const { connected } = useCoFHE();
+  const { connected, client } = useCoFHE();
   const [data, setData] = useState<{
     supplyAPY: bigint;
     borrowAPY: bigint;
@@ -152,24 +152,55 @@ export function useMarketData(marketAddress: string) {
         throw new Error(`Chain ${chainId} is not supported`);
       }
 
-      // In a real implementation, you would fetch this from the contracts:
-      // const cctoken = getContract({
-      //   address: marketAddress,
-      //   abi: CCTokenABI,
-      //   publicClient,
-      // });
+      // Import CCTokenABI
+      const { CCTokenABI } = await import('../abis/CCToken');
+
+      // Fetch encrypted total supply and total borrows from contract
+      const totalSuppliedCtHash = await publicClient.readContract({
+        address: marketAddress as `0x${string}`,
+        abi: CCTokenABI,
+        functionName: 'totalSupplied',
+        args: [],
+      }) as `0x${string}`;
+
+      const totalBorrowsCtHash = await publicClient.readContract({
+        address: marketAddress as `0x${string}`,
+        abi: CCTokenABI,
+        functionName: 'totalBorrows',
+        args: [],
+      }) as `0x${string}`;
+
+      // Decrypt the public encrypted values (anyone can decrypt these)
+      const { FheTypes } = await import('@cofhe/sdk');
       
-      // const supplyAPY = await cctoken.read.SUPPLY_RATE_VALUE();
-      // const borrowAPY = await cctoken.read.BORROW_RATE_VALUE();
-      // const collateralFactor = await cctoken.read.COLLATERAL_FACTOR_VALUE();
-      
-      // Placeholder values based on test file constants
+      let totalSupply = BigInt(0);
+      let totalBorrowed = BigInt(0);
+
+      try {
+        if (client && connected) {
+          const permit = await client.permits.getOrCreateSelfPermit();
+          
+          totalSupply = await client
+            .decryptForView(totalSuppliedCtHash as `0x${string}`, FheTypes.Uint64)
+            .withPermit(permit)
+            .execute();
+
+          totalBorrowed = await client
+            .decryptForView(totalBorrowsCtHash as `0x${string}`, FheTypes.Uint64)
+            .withPermit(permit)
+            .execute();
+        }
+      } catch (decryptErr) {
+        // If decryption fails, use 0 values
+        console.warn('Failed to decrypt market totals:', decryptErr);
+      }
+
       const marketData = {
         supplyAPY: 300n, // 3%
         borrowAPY: 500n, // 5%
         collateralFactor: 8000n, // 0.8 (80%)
-        totalSupply: 0n, // Would need to fetch from contract
-        totalBorrowed: 0n, // Would need to fetch from contract
+        totalSupply,
+        totalBorrowed,
       };
 
       setData(marketData);
@@ -180,7 +211,7 @@ export function useMarketData(marketAddress: string) {
     } finally {
       setLoading(false);
     }
-  }, [publicClient, marketAddress]);
+  }, [publicClient, marketAddress, client, connected]);
 
   useEffect(() => {
     if (connected && marketAddress) {
