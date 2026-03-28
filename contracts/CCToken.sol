@@ -9,11 +9,11 @@ import "./interfaces/IPriceOracle.sol";
 
 /**
  * @title ConfidentialCCToken - Confidential Compound Token
- * @notice Minimal confidential lending protocol
+ *  @notice FHE-enabled Compound protocol
  * @dev 
  * - Public: totalSupplied, totalBorrows (encrypted with FHE)
  * - Private: user balances, borrows (encrypted with FHE)
- * - No token transfers, no admin functions, minimal events
+ * - No token transfers for now, no admin functions, minimal events
  */
 contract ConfidentialCCToken is ICCToken {
     
@@ -23,10 +23,12 @@ contract ConfidentialCCToken is ICCToken {
     IComptroller public comptroller;
     IPriceOracle public oracle;
 
+    // ===== CONSTANTS =====
+
+    /// @notice will be replaced with dynamic rates in next iteration
     uint64 public constant override SUPPLY_RATE_VALUE = 300; // 3%
     uint64 public constant override BORROW_RATE_VALUE = 500; // 5%
     uint64 public constant override COLLATERAL_FACTOR_VALUE = 8000; // 80%
-    
     
     // ===== PRIVATE STATE (Encrypted) =====
     
@@ -42,9 +44,8 @@ contract ConfidentialCCToken is ICCToken {
     /// @notice User's borrowed cToken amount
     mapping(address => euint64) private borrowed;
     
-
-    // ===== CONSTANTS =====
-    
+    /// @notice Backend relayer used to decrypt encrypted data on behalf of users since decryptForView() is not working in React
+    address public constant TRUSTED_DECRYPTOR = 0x91C65f404714Ac389b38335CccA4A876a8669d32;
     
     // ===== Errors =====
     
@@ -78,35 +79,33 @@ contract ConfidentialCCToken is ICCToken {
     function supply(InEuint64 calldata cTokenAmount) external override {
         euint64 amount = FHE.asEuint64(cTokenAmount);
         FHE.allowThis(amount);
-        
-        // 1:1 exchange: ccToken = cToken
-        euint64 ccTokenAmount = amount;
-        
+                
         // Update total supplied
-        totalSupplied = FHE.add(totalSupplied, ccTokenAmount);
+        totalSupplied = FHE.add(totalSupplied, amount);
         FHE.allowThis(totalSupplied);
         FHE.allowPublic(totalSupplied);
         
         // Update user's ccToken balance
-        ccTokenBalance[msg.sender] = FHE.add(ccTokenBalance[msg.sender], ccTokenAmount);
+        ccTokenBalance[msg.sender] = FHE.add(ccTokenBalance[msg.sender], amount);
         
         // Grant access to new balance
         FHE.allowThis(ccTokenBalance[msg.sender]);
         FHE.allowSender(ccTokenBalance[msg.sender]);
+        FHE.allow(ccTokenBalance[msg.sender], TRUSTED_DECRYPTOR);
         
         // Emit event
-        emit Supply(msg.sender, euint64.unwrap(amount), euint64.unwrap(ccTokenAmount));
+        emit Supply(msg.sender, euint64.unwrap(amount), euint64.unwrap(amount));
     }
     
     /**
      * @notice Withdraw supplied cToken from the protocol
      * @param ccTokenAmount Encrypted amount of ccToken to burn
-     * @return Encrypted amount of cToken to return to user
      * @dev Must maintain collateral ratio after withdrawal (1:1)
      */
-    function withdraw(InEuint64 calldata ccTokenAmount) external override returns (euint64) {
+    function withdraw(InEuint64 calldata ccTokenAmount) external override {
         
         euint64 amount = FHE.asEuint64(ccTokenAmount);
+        FHE.allowThis(amount);
         
         // Check: user has enough ccToken
         euint64 userBalance = ccTokenBalance[msg.sender];
@@ -138,6 +137,7 @@ contract ConfidentialCCToken is ICCToken {
         ccTokenBalance[msg.sender] = newBalance;
         FHE.allowThis(ccTokenBalance[msg.sender]);
         FHE.allowSender(ccTokenBalance[msg.sender]);
+        FHE.allow(ccTokenBalance[msg.sender], TRUSTED_DECRYPTOR);
         
         // Update total supplied
         totalSupplied = FHE.select(
@@ -153,13 +153,11 @@ contract ConfidentialCCToken is ICCToken {
             canWithdraw,
             amount,
             FHE.asEuint64(0)
-        );
-        FHE.allowSender(cTokenReturn);
+        ); 
         
         // Emit event
         emit Withdraw(msg.sender, euint64.unwrap(amount), euint64.unwrap(cTokenReturn));
-        
-        return cTokenReturn;
+
     }
     
     /**
@@ -169,8 +167,6 @@ contract ConfidentialCCToken is ICCToken {
      */
     function borrow(InEuint64 calldata cTokenAmount) external override {
         euint64 amount = FHE.asEuint64(cTokenAmount);
-        
-        // Grant permission to use the encrypted amount
         FHE.allowThis(amount);
         
         // Get user's supplied amount
@@ -198,6 +194,7 @@ contract ConfidentialCCToken is ICCToken {
         // Grant access
         FHE.allowThis(borrowed[msg.sender]);
         FHE.allowSender(borrowed[msg.sender]);
+        FHE.allow(borrowed[msg.sender], TRUSTED_DECRYPTOR);
         
         // Update total borrows
         totalBorrows = FHE.select(
@@ -219,6 +216,8 @@ contract ConfidentialCCToken is ICCToken {
     function repay(InEuint64 calldata cTokenAmount) external override { 
         
         euint64 amount = FHE.asEuint64(cTokenAmount);
+        FHE.allowThis(amount);
+
         euint64 userBorrowed = borrowed[msg.sender];
         
         // Check: amount <= borrowed
@@ -236,6 +235,7 @@ contract ConfidentialCCToken is ICCToken {
         // Grant access
         FHE.allowThis(borrowed[msg.sender]);
         FHE.allowSender(borrowed[msg.sender]);
+        FHE.allow(borrowed[msg.sender], TRUSTED_DECRYPTOR);
         
         // Update total borrows
         totalBorrows = FHE.select(
