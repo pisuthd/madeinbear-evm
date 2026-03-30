@@ -15,7 +15,7 @@ function Hero() {
       </div>
 
       <div className="max-w-7xl mx-auto w-full relative z-10">
-         
+
         <div className="grid md:grid-cols-2 gap-12 items-center">
           {/* Left Content */}
           <div className="text-left">
@@ -35,10 +35,10 @@ function Hero() {
             </h2>
             {/* Description */}
             <p className="text-sm md:text-base text-[#94a3b8] mb-8 max-w-xl leading-relaxed">
-              Sensitive collateral values, borrowing exposure, and health factors stay fully private. Selective reveal supports seamless KYC, KYT, AML, and Travel Rule compliance.
+              Sensitive collateral values, borrowing exposure, and health factors remain fully private. Selective disclosure enables seamless KYC, KYT, AML, and Travel Rule compliance.
             </p>
             {/* CTA Buttons */}
-            <div className="flex flex-col sm:flex-row gap-4 mb-12"> 
+            <div className="flex flex-col sm:flex-row gap-4 mb-12">
               <Link
                 to="/dashboard"
                 className="px-8 py-4 bg-[#3eddfd] text-[#0f172a] font-semibold rounded-lg transition-all hover:bg-[#2dd4d4] hover:shadow-[0_0_30px_rgba(62,223,223,0.4)] hover:-translate-y-0.5 text-center"
@@ -49,7 +49,7 @@ function Hero() {
                 to="/credentials"
                 className="px-8 py-4 bg-[#1e293b] text-[#3eddfd] font-semibold rounded-lg transition-all hover:bg-[#334155] hover:shadow-[0_0_20px_rgba(62,223,223,0.2)] border border-[#3eddfd]/30 text-center"
               >
-                Get Your Credential
+                Mint Your Credential
               </Link>
             </div>
 
