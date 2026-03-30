@@ -2,27 +2,8 @@ import { useCallback, useState } from 'react';
 import { useWriteContract, useReadContract, usePublicClient } from 'wagmi';
 import { CTokenABI } from '../abis/CToken';
 import { erc20Abi } from 'viem';
-import { DEPLOYMENTS, MARKET_METADATA } from '../constants/deployments';
+import { DEPLOYMENTS } from '../constants/deployments';
 import { addBalance, subtractBalance } from '../utils/confidentialBalances';
-
-/**
- * Calculate the conversion rate for a CToken
- * Confidential tokens have max 6 decimals, so if underlying has more, we need a rate
- */
-function calculateConversionRate(cTokenAddress: `0x${string}`): bigint {
-  const market = MARKET_METADATA[cTokenAddress as keyof typeof MARKET_METADATA];
-  if (!market) return 1n;
-
-  const underlyingDecimals = market.decimals;
-  const maxConfidentialDecimals = 6;
-
-  if (underlyingDecimals > maxConfidentialDecimals) {
-    return BigInt(10 ** (underlyingDecimals - maxConfidentialDecimals));
-  }
-
-  return 1n;
-}
- 
 
 interface CTokenHookState {
   loading: boolean;
