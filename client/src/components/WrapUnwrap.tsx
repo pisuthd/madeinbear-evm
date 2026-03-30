@@ -43,7 +43,7 @@ export default function WrapUnwrap() {
   const [successMessage, setSuccessMessage] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
   const [showDropdown, setShowDropdown] = useState(false);
-  const [balanceKey, setBalanceKey] = useState(0); // Force re-render of balance
+  // const [balanceKey, setBalanceKey] = useState(0); // Force re-render of balance
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   const tokenInfo = TOKENS[selectedToken];
@@ -145,7 +145,7 @@ export default function WrapUnwrap() {
       await unwrap(tokenInfo.cTokenAddress, confidentialAmount, address, amountInWei);
 
       // Force re-render to show updated balance
-      setBalanceKey(prev => prev + 1);
+      // setBalanceKey(prev => prev + 1);
 
       setSuccessMessage(`Successfully initiated unwrap of ${amount} ${tokenInfo.symbol}.`);
       setAmount('');

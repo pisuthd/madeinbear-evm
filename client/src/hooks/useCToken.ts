@@ -22,22 +22,7 @@ function calculateConversionRate(cTokenAddress: `0x${string}`): bigint {
 
   return 1n;
 }
-
-/**
- * Convert ERC20 amount to confidential amount
- */
-function toConfidentialAmount(erc20Amount: bigint, cTokenAddress: `0x${string}`): bigint {
-  const rate = calculateConversionRate(cTokenAddress);
-  return erc20Amount / rate;
-}
-
-/**
- * Convert confidential amount to ERC20 amount
- */
-function toErc20Amount(confidentialAmount: bigint, cTokenAddress: `0x${string}`): bigint {
-  const rate = calculateConversionRate(cTokenAddress);
-  return confidentialAmount * rate;
-}
+ 
 
 interface CTokenHookState {
   loading: boolean;

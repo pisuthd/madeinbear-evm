@@ -18,7 +18,7 @@ const TOKENS: Record<string, { icon: string; name: string; cTokenAddress: `0x${s
 
 export default function PendingClaims() {
   const { address } = useAccount();
-  const { pendingClaims, allClaims } = usePendingClaims(address);
+  const { pendingClaims } = usePendingClaims(address);
   const { claim } = useCToken();
   const { client: cofheClient } = useCoFHE();
   const [claiming, setClaiming] = useState<Record<string, boolean>>({});
