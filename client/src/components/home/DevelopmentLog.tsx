@@ -48,7 +48,7 @@ function DevelopmentLog() {
                 {/* Section Header */}
                 <div className="text-center mb-16">
                     <h2 className="text-3xl md:text-4xl lg:text-[48px] font-bold mb-4 text-[#f8fafc] tracking-tight">
-                        Development Roadmap
+                        Development Log
                     </h2>
                     <div className="w-24 h-1 bg-gradient-to-r from-[#3eddfd] to-transparent mx-auto" />
                 </div>

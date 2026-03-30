@@ -7,12 +7,14 @@ import BorrowPositions from '../components/portfolio/BorrowPositions';
 import MarketsTable from '../components/markets/MarketsTable';
 import WrapUnwrap from '../components/WrapUnwrap';
 import PendingClaims from '../components/PendingClaims';
+import DashboardOnboardingModal from '../components/DashboardOnboardingModal';
 import { usePositions } from '../hooks/useCCToken';
 import { getAllMarkets, DEPLOYMENTS } from '../constants/deployments';
 import { useCoFHE } from '../context/CoFHEContext';
 
 function Dashboard() {
   const [activeTab, setActiveTab] = useState('markets');
+  const [showOnboardingModal, setShowOnboardingModal] = useState(true);
   const { isConnected } = useAccount();
   const publicClient = usePublicClient();
   const { connected } = useCoFHE();
@@ -169,6 +171,12 @@ function Dashboard() {
 
   return (
     <div className="w-full px-4 md:px-8 py-12 pt-24">
+      {/* Onboarding Modal - Shows every time */}
+      <DashboardOnboardingModal
+        isOpen={showOnboardingModal}
+        onClose={() => setShowOnboardingModal(false)}
+      />
+
       {/* Split Layout: Sidebar + Content */}
       <div className="flex flex-col md:flex-row gap-6">
         {/* Left Sidebar - Table Style Tabs (Always Visible) */}

@@ -8,7 +8,7 @@ function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
 
           {/* Column 1: Logo & Description */}
-          <div className="text-center col-span-2 md:text-left">
+          <div className="text-center col-span-3 md:text-left">
             <Link
               to="/"
               className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-[#3eddfd] to-white bg-clip-text text-transparent mb-4 inline-block hover:opacity-80 transition-opacity"
@@ -53,7 +53,7 @@ function Footer() {
           </div>
 
           {/* Column 3: Contact & Social */}
-          <div className="text-center md:text-left">
+          {/* <div className="text-center md:text-left">
             <h3 className="text-[#f8fafc] font-semibold mb-4 text-lg">Contact</h3>
             <ul className="space-y-2">
               <li>
@@ -105,7 +105,7 @@ function Footer() {
                 </a>
               </li>
             </ul>
-          </div>
+          </div> */}
         </div>
 
         {/* Divider */}

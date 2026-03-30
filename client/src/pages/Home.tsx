@@ -1,6 +1,7 @@
 import Hero from '../components/home/Hero';
 import KeyFeatures from '../components/home/KeyFeatures';
 import DevelopmentLog from '../components/home/DevelopmentLog';
+import CTA from '../components/home/CTA';
 
 function Home() {
   return (
@@ -8,10 +9,7 @@ function Home() {
       <Hero />
       <KeyFeatures />
       <DevelopmentLog />
-      {/* <HowItWorks />
-      <WhyAgentToAgent /> */}
-      {/* <ComplianceStack /> */}
-      {/* <CTA /> */}
+      <CTA />
     </main>
   );
 }
