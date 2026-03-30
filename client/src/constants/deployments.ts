@@ -17,6 +17,10 @@ export const DEPLOYMENTS = {
     // Market cTokens
     ccWETH: '0x9123Fe9BE015b8562Bb91933D028D9aba9d2fF54',
     ccUSDT: '0x37Dd2f6335EF90272141156153EC879CDb8E3bB7',
+    
+    // Confidential token wrappers (CToken)
+    cWETH: '0xc80c4805fb463975dA194Bac8D3739479E7a78F8',
+    cUSDT: '0x014476bA75E5BAd792a9C91537B408df7e903F1d',
   },
 } as const;
 

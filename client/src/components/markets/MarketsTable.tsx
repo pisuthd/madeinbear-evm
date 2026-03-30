@@ -103,9 +103,9 @@ export default function MarketsTable() {
         {/* Header */}
         <div className="px-6 py-4 border-b border-[#3eddfd]/10">
           <h3 className="text-xl font-bold text-[#f8fafc]">Available Markets</h3>
-          <p className="text-sm text-[#94a3b8] mt-1">
+          {/* <p className="text-sm text-[#94a3b8] mt-1">
             Supply assets to earn interest or borrow against your collateral
-          </p>
+          </p> */}
         </div>
 
         {/* Table */}

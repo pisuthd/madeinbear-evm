@@ -35,11 +35,11 @@ function MockTokenFaucet() {
   return (
     <div className="bg-[#1e293b] rounded-2xl border border-[#334155] p-6">
       <h3 className="text-lg font-semibold text-[#f8fafc] mb-2">Faucet</h3>
-      <p className="text-sm text-[#94a3b8] mb-6">
+      {/* <p className="text-sm text-[#94a3b8] mb-6">
         Mint test WETH and USDT tokens for testing on Sepolia testnet.
-      </p>
+      </p> */}
 
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-2 gap-4">
         {/* WETH Faucet */}
         <div className="bg-[#0f172a] rounded-lg p-6 border border-[#334155] hover:border-[#3eddfd]/30 transition-all">
           {/* WETH Success Message */}

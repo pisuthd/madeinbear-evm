@@ -5,6 +5,8 @@ import WalletBalances from '../components/portfolio/WalletBalances';
 import SupplyPositions from '../components/portfolio/SupplyPositions';
 import BorrowPositions from '../components/portfolio/BorrowPositions';
 import MarketsTable from '../components/markets/MarketsTable';
+import WrapUnwrap from '../components/WrapUnwrap';
+import PendingClaims from '../components/PendingClaims';
 import { usePositions } from '../hooks/useCCToken';
 import { getAllMarkets, DEPLOYMENTS } from '../constants/deployments';
 import { useCoFHE } from '../context/CoFHEContext';
@@ -44,7 +46,7 @@ function Dashboard() {
   }, [connected, publicClient, fetchPositions]);
 
   const tabs = [
-   
+
     {
       id: 'markets',
       title: 'Markets',
@@ -65,7 +67,7 @@ function Dashboard() {
         </svg>
       ),
     },
-     {
+    {
       id: 'faucet',
       title: 'Faucet',
       subtitle: 'Get test tokens for testing',
@@ -106,18 +108,23 @@ function Dashboard() {
 
     switch (activeTab) {
       case 'faucet':
-        return <MockTokenFaucet />;
+        return <div className="space-y-6 grid grid-cols-1 xl:grid-cols-3">
+          <div className='col-span-2'>
+            <MockTokenFaucet />;
+          </div>
+
+        </div>
       case 'markets':
         return <MarketsTable />;
       case 'portfolio':
         return (
           <div className="space-y-6">
             <WalletBalances />
-            
+
             {/* Load Private Positions Button */}
             <div className=" ">
               <div className="flex items-center justify-between">
-                
+
                 <button
                   onClick={loadPositions}
                   disabled={loading || !connected}
@@ -146,17 +153,13 @@ function Dashboard() {
         );
       case 'wrap':
         return (
-          <div className="space-y-6">
-            <div className="text-center py-16">
-              <div className="w-24 h-24 mx-auto mb-6 rounded-2xl bg-[#3eddfd]/5 flex items-center justify-center border border-[#3eddfd]/20">
-                <svg className="w-12 h-12 text-[#3eddfd]/60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
-                </svg>
-              </div>
-              <h3 className="text-2xl font-bold text-[#f8fafc] mb-3">Wrap / Unwrap</h3>
-              <p className="text-[#94a3b8] text-lg">Convert ERC-20 to Confidential Tokens</p>
-              <p className="text-[#64748b] text-sm mt-4">Content coming soon...</p>
+          <div className="space-y-6 grid grid-cols-1 xl:grid-cols-2">
+            <div>
+              <WrapUnwrap />
+              <br />
+              <PendingClaims />
             </div>
+
           </div>
         );
       default:
@@ -175,35 +178,31 @@ function Dashboard() {
             <div className="bg-[#0f172a] px-4 py-3 border-b border-[#3eddfd]/10">
               <span className="text-sm font-medium text-[#3eddfd]">Dashboard</span>
             </div>
-            
+
             {/* Table Rows */}
             {tabs.map((tab) => (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`w-full px-4 py-5 border-b border-[#3eddfd]/10 transition-all duration-200 text-left flex items-center gap-4 last:border-b-0 ${
-                  activeTab === tab.id
-                    ? 'bg-[#3eddfd]/10 border-l-4 border-l-[#3eddfd]'
-                    : 'bg-transparent hover:bg-[#1e293b] border-l-4 border-l-transparent'
-                }`}
+                className={`w-full px-4 py-5 border-b border-[#3eddfd]/10 transition-all duration-200 text-left flex items-center gap-4 last:border-b-0 ${activeTab === tab.id
+                  ? 'bg-[#3eddfd]/10 border-l-4 border-l-[#3eddfd]'
+                  : 'bg-transparent hover:bg-[#1e293b] border-l-4 border-l-transparent'
+                  }`}
               >
                 {/* Icon Cell */}
-                <div className={`flex-shrink-0 w-10 h-10 rounded flex items-center justify-center transition-colors ${
-                  activeTab === tab.id ? 'bg-[#3eddfd]/20 text-[#3eddfd]' : 'bg-[#3eddfd]/5 text-[#3eddfd]/60'
-                }`}>
+                <div className={`flex-shrink-0 w-10 h-10 rounded flex items-center justify-center transition-colors ${activeTab === tab.id ? 'bg-[#3eddfd]/20 text-[#3eddfd]' : 'bg-[#3eddfd]/5 text-[#3eddfd]/60'
+                  }`}>
                   {tab.icon}
                 </div>
-                
+
                 {/* Text Content Cell */}
                 <div className="flex-1 min-w-0">
-                  <div className={`font-medium text-base mb-1 ${
-                    activeTab === tab.id ? 'text-[#f8fafc]' : 'text-[#cbd5e1]'
-                  }`}>
+                  <div className={`font-medium text-base mb-1 ${activeTab === tab.id ? 'text-[#f8fafc]' : 'text-[#cbd5e1]'
+                    }`}>
                     {tab.title}
                   </div>
-                  <div className={`text-xs leading-relaxed ${
-                    activeTab === tab.id ? 'text-[#3eddfd]' : 'text-[#94a3b8]'
-                  }`}>
+                  <div className={`text-xs leading-relaxed ${activeTab === tab.id ? 'text-[#3eddfd]' : 'text-[#94a3b8]'
+                    }`}>
                     {tab.subtitle}
                   </div>
                 </div>
