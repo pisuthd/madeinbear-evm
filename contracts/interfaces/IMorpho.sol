@@ -1,5 +1,7 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
-pragma solidity >=0.5.0;
+pragma solidity ^0.8.25;
+
+import { euint64, euint128, ebool } from "@fhenixprotocol/cofhe-contracts/FHE.sol";
 
 type Id is bytes32;
 
@@ -14,9 +16,9 @@ struct MarketParams {
 /// @dev Warning: For `feeRecipient`, `supplyShares` does not contain the accrued shares since the last interest
 /// accrual.
 struct Position {
-    uint256 supplyShares;
-    uint128 borrowShares;
-    uint128 collateral;
+    euint128 supplyShares;
+    euint64 borrowShares;
+    euint64 collateral;
 }
 
 /// @dev Warning: `totalSupplyAssets` does not contain the accrued interest since the last interest accrual.
@@ -303,7 +305,7 @@ interface IMorphoStaticTyping is IMorphoBase {
     function position(Id id, address user)
         external
         view
-        returns (uint256 supplyShares, uint128 borrowShares, uint128 collateral);
+        returns (euint128 supplyShares, euint64 borrowShares, euint64 collateral);
 
     /// @notice The state of the market corresponding to `id`.
     /// @dev Warning: `totalSupplyAssets` does not contain the accrued interest since the last interest accrual.
