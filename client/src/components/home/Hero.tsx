@@ -21,21 +21,16 @@ function Hero() {
           <div className="text-left">
             {/* Pre-Headline */}
             <p className="mb-4 text-sm md:text-base lg:text-xl font-medium text-[#3eddfd] font-mono">
-              2026: When Privacy Meets Institutional Finance
+              2026: Banking, Rebuilt On-Chain
             </p>
 
             {/* Main Headline */}
             <h1 className="text-3xl md:text-4xl lg:text-[56px] font-bold mb-4 leading-tight text-[#f8fafc] tracking-tight">
-              Confidential Lending for Institutional Capital
-            </h1>
-
-            {/* Subheadline */}
-            <h2 className="text-sm md:text-base  lg:text-[24px] mb-4 font-semibold text-[#cbd5e1] leading-relaxed">
-              Built with Fhenix Fully Homomorphic Encryption
-            </h2>
+              A Fully On-Chain Bank for Digital Assets
+            </h1> 
             {/* Description */}
-            <p className="text-sm md:text-base text-[#94a3b8] mb-8 max-w-xl leading-relaxed">
-              Sensitive collateral values, borrowing exposure, and health factors remain fully private. Selective disclosure enables seamless KYC, KYT, AML, and Travel Rule compliance.
+            <p className="text-base md:text-xl text-[#cbd5e1] mb-8 font-semibold max-w-xl leading-relaxed">
+              A complete banking system on-chain — deposits, credit, and investment accounts, powered by Fhenix with ERC-7984 confidential tokens
             </p>
             {/* CTA Buttons */}
             <div className="flex flex-col sm:flex-row gap-4 mb-12">
@@ -43,13 +38,13 @@ function Hero() {
                 to="/dashboard"
                 className="px-8 py-4 bg-[#3eddfd] text-[#0f172a] font-semibold rounded-lg transition-all hover:bg-[#2dd4d4] hover:shadow-[0_0_30px_rgba(62,223,223,0.4)] hover:-translate-y-0.5 text-center"
               >
-                Deploy Capital
+                Open Account
               </Link>
               <Link
                 to="/credentials"
                 className="px-8 py-4 bg-[#1e293b] text-[#3eddfd] font-semibold rounded-lg transition-all hover:bg-[#334155] hover:shadow-[0_0_20px_rgba(62,223,223,0.2)] border border-[#3eddfd]/30 text-center"
               >
-                Mint Your Credential
+                View Rates
               </Link>
             </div>
 

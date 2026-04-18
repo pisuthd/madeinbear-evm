@@ -6,9 +6,8 @@ function Header() {
   const { connected, connecting, error } = useCoFHE();
 
   const navItems: { label: string; path: string }[] = [
-    { label: 'Dashboard', path: '/dashboard' },
-    { label: 'Credentials', path: '/credentials' },
-    { label: 'Ask AI', path: '/ask-ai' }
+    { label: 'Rates', path: '/rates' },
+    { label: 'Dashboard', path: '/dashboard' }
   ];
 
   return (

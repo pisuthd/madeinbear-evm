@@ -11,13 +11,13 @@ function Footer() {
           <div className="text-center col-span-3 md:text-left">
             <Link
               to="/"
-              className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-[#3eddfd] to-white bg-clip-text text-transparent mb-4 inline-block hover:opacity-80 transition-opacity"
+              className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-[#3eddfd] to-white bg-clip-text text-transparent mb-4 inline-block hover:opacity-80 transition-opacity"
               style={{ fontFamily: '"Orbitron", sans-serif' }}
             >
               MadeInBear
             </Link>
             <p className="text-[#94a3b8] text-sm leading-relaxed">
-              Confidential Lending for Institutional Capital
+              A Fully On-Chain Bank for Digital Assets 
             </p>
           </div>
 
@@ -113,7 +113,7 @@ function Footer() {
 
         {/* Bottom Row: Hackathon Badge & Copyright */}
         <div className="flex flex-col md:flex-row justify-between items-center text-center md:text-left gap-4">
-          <p className="text-[#94a3b8] text-sm">
+          <p className="text-[#94a3b8] text-sm italic">
             Made with ❤️ during Akindo Buildathon
           </p>
           <div className="text-center md:text-right">
@@ -121,12 +121,12 @@ function Footer() {
               © 2026
               {` `}
               <a
-                href="https://tamagolabs.com"
+                href="#"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-[#3eddfd] hover:text-[#2dd4d4] transition-colors text-sm font-medium"
               >
-                Tamago Labs Japan
+                MadeInBear
               </a>
             </p>
 
