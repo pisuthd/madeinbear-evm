@@ -12,6 +12,10 @@ const config: HardhatUserConfig = {
 		version: '0.8.25',
 		settings: {
 			evmVersion: 'cancun',
+			optimizer: {
+				enabled: true,
+				runs: 200  // Controls code size vs runtime efficiency tradeoff
+			}
 		},
 	},
 	defaultNetwork: 'hardhat',

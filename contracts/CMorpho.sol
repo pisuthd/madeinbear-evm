@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 pragma solidity ^0.8.25;
- 
+
 
 import { FHE, euint64, euint128, ebool } from "@fhenixprotocol/cofhe-contracts/FHE.sol";
 import { IFHERC20 } from "fhenix-confidential-contracts/contracts/interfaces/IFHERC20.sol";
@@ -42,7 +42,7 @@ import {MarketParamsLib} from "./libraries/MarketParamsLib.sol";
  *         token transfers instead of plain ERC20.
  * @dev Based on Morpho-Blue architecture with CoFHE (FHE Coprocessor) encryption.
  */
-abstract contract Morpho is IMorphoStaticTyping {
+contract CMorpho is IMorphoStaticTyping {
 
     using MathLib for uint128;
     using MathLib for uint256;
@@ -60,7 +60,7 @@ abstract contract Morpho is IMorphoStaticTyping {
     /// @inheritdoc IMorphoBase
     address public owner;
     /// @dev Encrypted positions: id => user => Position (supplyShares, borrowShares, collateral all encrypted)
-    mapping(Id => mapping(address => Position)) internal position;
+    mapping(Id => mapping(address => Position)) public position;
     /// @inheritdoc IMorphoStaticTyping
     mapping(Id => Market) public market;
     /// @inheritdoc IMorphoBase
@@ -157,28 +157,6 @@ abstract contract Morpho is IMorphoStaticTyping {
         return msg.sender == onBehalf || isAuthorized[onBehalf][msg.sender];
     }
 
-    /// @dev Grants FHE permissions on all 3 position fields for: contract, owner, caller, and liquidator.
-    function _grantPermissions(Id id, address user) internal {
-        Position storage p = position[id][user];
-
-        // supplyShares (euint128)
-        FHE.allowThis(p.supplyShares);
-        FHE.allow(p.supplyShares, user);
-        FHE.allowSender(p.supplyShares);
-        if (liquidator != address(0)) FHE.allow(p.supplyShares, liquidator);
-
-        // borrowShares (euint64)
-        FHE.allowThis(p.borrowShares);
-        FHE.allow(p.borrowShares, user);
-        FHE.allowSender(p.borrowShares);
-        if (liquidator != address(0)) FHE.allow(p.borrowShares, liquidator);
-
-        // collateral (euint64)
-        FHE.allowThis(p.collateral);
-        FHE.allow(p.collateral, user);
-        FHE.allowSender(p.collateral);
-        if (liquidator != address(0)) FHE.allow(p.collateral, liquidator);
-    }
 
     /* SUPPLY MANAGEMENT */
 
@@ -205,7 +183,10 @@ abstract contract Morpho is IMorphoStaticTyping {
             position[id][onBehalf].supplyShares,
             FHE.asEuint128(shares)
         );
-        _grantPermissions(id, onBehalf);
+
+        FHE.allowThis(position[id][onBehalf].supplyShares);
+        FHE.allowSender(position[id][onBehalf].supplyShares);
+        if (liquidator != address(0)) FHE.allow(position[id][onBehalf].supplyShares, liquidator);
 
         market[id].totalSupplyShares += shares.toUint128();
         market[id].totalSupplyAssets += assets.toUint128();
@@ -215,8 +196,10 @@ abstract contract Morpho is IMorphoStaticTyping {
         if (data.length > 0) IMorphoSupplyCallback(msg.sender).onMorphoSupply(assets, data);
 
         // Confidential token transfer: user → Morpho (requires user to have set Morpho as operator via CToken.setOperator)
+        euint64 amount = FHE.asEuint64(uint64(assets));
+        FHE.allow(amount, address(marketParams.loanToken));
         IFHERC20(marketParams.loanToken).confidentialTransferFrom(
-            msg.sender, address(this), FHE.asEuint64(uint64(assets))
+            msg.sender, address(this), amount
         );
 
         return (assets, shares);
@@ -247,7 +230,10 @@ abstract contract Morpho is IMorphoStaticTyping {
             position[id][onBehalf].supplyShares,
             FHE.asEuint128(shares)
         );
-        _grantPermissions(id, onBehalf);
+
+        FHE.allowThis(position[id][onBehalf].supplyShares);
+        FHE.allowSender(position[id][onBehalf].supplyShares);
+        if (liquidator != address(0)) FHE.allow(position[id][onBehalf].supplyShares, liquidator);
 
         market[id].totalSupplyShares -= shares.toUint128();
         market[id].totalSupplyAssets -= assets.toUint128();
@@ -257,9 +243,9 @@ abstract contract Morpho is IMorphoStaticTyping {
         emit EventsLib.Withdraw(id, msg.sender, onBehalf, receiver, assets, shares);
 
         // Confidential token transfer: Morpho → receiver
-        IFHERC20(marketParams.loanToken).confidentialTransfer(
-            receiver, FHE.asEuint64(uint64(assets))
-        );
+        euint64 withdrawAmount = FHE.asEuint64(uint64(assets));
+        FHE.allow(withdrawAmount, address(marketParams.loanToken));
+        IFHERC20(marketParams.loanToken).confidentialTransfer(receiver, withdrawAmount);
 
         return (assets, shares);
     }
@@ -291,7 +277,10 @@ abstract contract Morpho is IMorphoStaticTyping {
             position[id][onBehalf].borrowShares,
             FHE.asEuint64(uint64(shares))
         );
-        _grantPermissions(id, onBehalf);
+
+        FHE.allowThis(position[id][onBehalf].borrowShares);
+        FHE.allowSender(position[id][onBehalf].borrowShares);
+        if (liquidator != address(0)) FHE.allow(position[id][onBehalf].borrowShares, liquidator);
 
         market[id].totalBorrowShares += shares.toUint128();
         market[id].totalBorrowAssets += assets.toUint128();
@@ -304,9 +293,9 @@ abstract contract Morpho is IMorphoStaticTyping {
         emit EventsLib.Borrow(id, msg.sender, onBehalf, receiver, assets, shares);
 
         // Confidential token transfer: Morpho → receiver
-        IFHERC20(marketParams.loanToken).confidentialTransfer(
-            receiver, FHE.asEuint64(uint64(assets))
-        );
+        euint64 borrowAmount = FHE.asEuint64(uint64(assets));
+        FHE.allow(borrowAmount, address(marketParams.loanToken));
+        IFHERC20(marketParams.loanToken).confidentialTransfer(receiver, borrowAmount);
 
         return (assets, shares);
     }
@@ -334,7 +323,10 @@ abstract contract Morpho is IMorphoStaticTyping {
             position[id][onBehalf].borrowShares,
             FHE.asEuint64(uint64(shares))
         );
-        _grantPermissions(id, onBehalf);
+
+        FHE.allowThis(position[id][onBehalf].borrowShares);
+        FHE.allowSender(position[id][onBehalf].borrowShares);
+        if (liquidator != address(0)) FHE.allow(position[id][onBehalf].borrowShares, liquidator);
 
         market[id].totalBorrowShares -= shares.toUint128();
         market[id].totalBorrowAssets = UtilsLib.zeroFloorSub(market[id].totalBorrowAssets, assets).toUint128();
@@ -345,8 +337,10 @@ abstract contract Morpho is IMorphoStaticTyping {
         if (data.length > 0) IMorphoRepayCallback(msg.sender).onMorphoRepay(assets, data);
 
         // Confidential token transfer: user → Morpho (requires user to have set Morpho as operator via CToken.setOperator)
+        euint64 repayAmount = FHE.asEuint64(uint64(assets));
+        FHE.allow(repayAmount, address(marketParams.loanToken));
         IFHERC20(marketParams.loanToken).confidentialTransferFrom(
-            msg.sender, address(this), FHE.asEuint64(uint64(assets))
+            msg.sender, address(this), repayAmount
         );
 
         return (assets, shares);
@@ -370,15 +364,20 @@ abstract contract Morpho is IMorphoStaticTyping {
             position[id][onBehalf].collateral,
             FHE.asEuint64(uint64(assets))
         );
-        _grantPermissions(id, onBehalf);
+
+        FHE.allowThis(position[id][onBehalf].collateral);
+        FHE.allowSender(position[id][onBehalf].collateral);
+        if (liquidator != address(0)) FHE.allow(position[id][onBehalf].collateral, liquidator);
 
         emit EventsLib.SupplyCollateral(id, msg.sender, onBehalf, assets);
 
         if (data.length > 0) IMorphoSupplyCollateralCallback(msg.sender).onMorphoSupplyCollateral(assets, data);
 
         // Confidential transfer: user → Morpho (collateralToken, not loanToken!)
+        euint64 supplyCollateralAmount = FHE.asEuint64(uint64(assets));
+        FHE.allow(supplyCollateralAmount, address(marketParams.collateralToken));
         IFHERC20(marketParams.collateralToken).confidentialTransferFrom(
-            msg.sender, address(this), FHE.asEuint64(uint64(assets))
+            msg.sender, address(this), supplyCollateralAmount
         );
     }
 
@@ -400,7 +399,10 @@ abstract contract Morpho is IMorphoStaticTyping {
             position[id][onBehalf].collateral,
             FHE.asEuint64(uint64(assets))
         );
-        _grantPermissions(id, onBehalf);
+
+        FHE.allowThis(position[id][onBehalf].collateral);
+        FHE.allowSender(position[id][onBehalf].collateral);
+        if (liquidator != address(0)) FHE.allow(position[id][onBehalf].collateral, liquidator);
 
         // TODO: Cannot require() with encrypted ebool result.
         // Health check skipped — same pattern as borrow().
@@ -409,8 +411,10 @@ abstract contract Morpho is IMorphoStaticTyping {
         emit EventsLib.WithdrawCollateral(id, msg.sender, onBehalf, receiver, assets);
 
         // Confidential transfer: Morpho → receiver (collateralToken, not loanToken!)
+        euint64 withdrawCollateralAmount = FHE.asEuint64(uint64(assets));
+        FHE.allow(withdrawCollateralAmount, address(marketParams.collateralToken));
         IFHERC20(marketParams.collateralToken).confidentialTransfer(
-            receiver, FHE.asEuint64(uint64(assets))
+            receiver, withdrawCollateralAmount
         );
     }
 

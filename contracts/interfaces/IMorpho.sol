@@ -61,10 +61,7 @@ interface IMorphoBase {
     /// @dev It has the power to set fees on markets and set the fee recipient.
     /// @dev It has the power to enable but not disable IRMs and LLTVs.
     function owner() external view returns (address);
-
-    /// @notice The fee recipient of all markets.
-    /// @dev The recipient receives the fees of a given market through a supply position on that market.
-    function feeRecipient() external view returns (address);
+ 
 
     /// @notice Whether the `irm` is enabled.
     function isIrmEnabled(address irm) external view returns (bool);
@@ -92,17 +89,7 @@ interface IMorphoBase {
     /// @dev Warning: It is not possible to disable a LLTV.
     function enableLltv(uint256 lltv) external;
 
-    /// @notice Sets the `newFee` for the given market `marketParams`.
-    /// @param newFee The new fee, scaled by WAD.
-    /// @dev Warning: The recipient can be the zero address.
-    function setFee(MarketParams memory marketParams, uint256 newFee) external;
-
-    /// @notice Sets `newFeeRecipient` as `feeRecipient` of the fee.
-    /// @dev Warning: If the fee recipient is set to the zero address, fees will accrue there and will be lost.
-    /// @dev Modifying the fee recipient will allow the new recipient to claim any pending fees not yet accrued. To
-    /// ensure that the current recipient receives all due fees, accrue interest manually prior to making any changes.
-    function setFeeRecipient(address newFeeRecipient) external;
-
+     
     /// @notice Creates the market `marketParams`.
     /// @dev Here is the list of assumptions on the market's dependencies (tokens, IRM and oracle) that guarantees
     /// Morpho behaves as expected:
@@ -256,13 +243,13 @@ interface IMorphoBase {
     /// @param data Arbitrary data to pass to the `onMorphoLiquidate` callback. Pass empty data if not needed.
     /// @return The amount of assets seized.
     /// @return The amount of assets repaid.
-    function liquidate(
-        MarketParams memory marketParams,
-        address borrower,
-        uint256 seizedAssets,
-        uint256 repaidShares,
-        bytes memory data
-    ) external returns (uint256, uint256);
+    // function liquidate(
+    //     MarketParams memory marketParams,
+    //     address borrower,
+    //     uint256 seizedAssets,
+    //     uint256 repaidShares,
+    //     bytes memory data
+    // ) external returns (uint256, uint256);
 
     /// @notice Executes a flash loan.
     /// @dev Flash loans have access to the whole balance of the contract (the liquidity and deposited collateral of all
@@ -274,7 +261,7 @@ interface IMorphoBase {
     /// @param token The token to flash loan.
     /// @param assets The amount of assets to flash loan.
     /// @param data Arbitrary data to pass to the `onMorphoFlashLoan` callback.
-    function flashLoan(address token, uint256 assets, bytes calldata data) external;
+    // function flashLoan(address token, uint256 assets, bytes calldata data) external;
 
     /// @notice Sets the authorization for `authorized` to manage `msg.sender`'s positions.
     /// @param authorized The authorized address.
