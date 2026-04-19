@@ -151,12 +151,17 @@ export const CTokenABI = [
     inputs: [
       {
         internalType: "address",
+        name: "from",
+        type: "address"
+      },
+      {
+        internalType: "address",
         name: "to",
         type: "address"
       },
       {
         internalType: "uint64",
-        name: "value",
+        name: "amount",
         type: "uint64"
       }
     ],
@@ -224,6 +229,11 @@ export const CTokenABI = [
       {
         components: [
           {
+            internalType: "address",
+            name: "to",
+            type: "address"
+          },
+          {
             internalType: "bytes32",
             name: "ctHash",
             type: "bytes32"
@@ -240,21 +250,11 @@ export const CTokenABI = [
           },
           {
             internalType: "bool",
-            name: "decrypted",
-            type: "bool"
-          },
-          {
-            internalType: "address",
-            name: "to",
-            type: "address"
-          },
-          {
-            internalType: "bool",
             name: "claimed",
             type: "bool"
           }
         ],
-        internalType: "struct FHERC20UnshieldClaim.Claim[]",
+        internalType: "struct FHERC20WrapperClaimHelper.Claim[]",
         name: "",
         type: "tuple[]"
       }
@@ -275,6 +275,11 @@ export const CTokenABI = [
       {
         components: [
           {
+            internalType: "address",
+            name: "to",
+            type: "address"
+          },
+          {
             internalType: "bytes32",
             name: "ctHash",
             type: "bytes32"
@@ -291,21 +296,11 @@ export const CTokenABI = [
           },
           {
             internalType: "bool",
-            name: "decrypted",
-            type: "bool"
-          },
-          {
-            internalType: "address",
-            name: "to",
-            type: "address"
-          },
-          {
-            internalType: "bool",
             name: "claimed",
             type: "bool"
           }
         ],
-        internalType: "struct FHERC20UnshieldClaim.Claim",
+        internalType: "struct FHERC20WrapperClaimHelper.Claim",
         name: "",
         type: "tuple"
       }

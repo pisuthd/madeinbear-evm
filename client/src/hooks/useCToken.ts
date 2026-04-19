@@ -11,13 +11,12 @@ interface CTokenHookState {
 }
 
 export interface Claim {
+  to: `0x${string}`;
   ctHash: `0x${string}`;
   requestedAmount: bigint;
   decryptedAmount: bigint;
-  decrypted: boolean;
-  to: `0x${string}`;
   claimed: boolean;
-  token?: string; // Added to identify which token this claim belongs to
+  token?: string;
 }
 
 export function useCToken() {
@@ -44,13 +43,8 @@ export function useCToken() {
       if (!publicClient) {
         throw new Error('Public client not available');
       }
-
-      // Get the underlying ERC-20 token address
-      const erc20Address = await publicClient.readContract({
-        address: cTokenAddress,
-        abi: CTokenABI,
-        functionName: 'erc20',
-      }) as `0x${string}`;
+ 
+      const erc20Address = cTokenAddress === "0x1B86F12280F4241312DE4bd80cE2e8A5B5D06A9F" ? "0xAbda7A80cDc18bB577DeA3c102F35a75DBD37591" : "0x423df22BeD1528b84427A31BB0dfeDE760392e76"
 
       // Check allowance
       const allowance = await publicClient.readContract({
@@ -59,6 +53,7 @@ export function useCToken() {
         functionName: 'allowance',
         args: [userAddress, cTokenAddress],
       }) as bigint;
+ 
 
       // Approve if necessary
       if (allowance < amount) {
@@ -71,8 +66,8 @@ export function useCToken() {
 
         await publicClient.waitForTransactionReceipt({ hash: approveHash });
 
-        // add 3s delay
-        await new Promise(resolve => setTimeout(resolve, 5000));
+        // Wait for approval to be processed
+        await new Promise(resolve => setTimeout(resolve, 3000));
       }
 
       // Shield the tokens (contract expects ERC20 amount)
@@ -85,10 +80,8 @@ export function useCToken() {
 
       await publicClient.waitForTransactionReceipt({ hash: shieldHash });
 
-      // Update local balance tracking with CONFIDENTIAL amount (not ERC20 amount)
-      // For WETH/USDT (18 decimals), confidential = ERC20 / 10^12
-      const confidentialAmount = amount / BigInt(10 ** 12);
-      addBalance(userAddress, cTokenAddress, confidentialAmount);
+      // Wait for approval to be processed
+      await new Promise(resolve => setTimeout(resolve, 3000));
 
       setState({ loading: false, error: null });
       return shieldHash;
@@ -110,8 +103,7 @@ export function useCToken() {
   const unwrap = useCallback(async (
     cTokenAddress: `0x${string}`,
     amount: bigint,
-    userAddress: `0x${string}`,
-    erc20Amount?: bigint
+    userAddress: `0x${string}`
   ) => {
     setState({ loading: true, error: null });
 
@@ -123,28 +115,18 @@ export function useCToken() {
       if (!publicClient) {
         throw new Error('Public client not available');
       }
-
-      console.log("unwrap...", userAddress, amount, erc20Amount)
-
-      // Unshield the tokens
+ 
       const unshieldHash = await writeContractAsync({
         address: cTokenAddress,
         abi: CTokenABI,
         functionName: 'unshield',
-        args: [userAddress, amount],
+        args: [userAddress, userAddress, amount],
       });
 
       await publicClient.waitForTransactionReceipt({ hash: unshieldHash });
 
-      // Update local balance tracking
-      // If erc20Amount is provided, convert it to confidential amount for precise subtraction
-      // For WETH/USDT (18 decimals), confidential = ERC20 / 10^12
-      // Otherwise, subtract the confidential amount directly
-      const amountToSubtract = erc20Amount
-        ? erc20Amount / BigInt(10 ** 12)
-        : amount;
-
-      subtractBalance(userAddress, cTokenAddress, amountToSubtract);
+      // Wait for approval to be processed
+      await new Promise(resolve => setTimeout(resolve, 3000));
 
       setState({ loading: false, error: null });
       return unshieldHash;
@@ -189,46 +171,11 @@ export function useCToken() {
       throw error;
     }
   }, [writeContractAsync, publicClient]);
-
-  /**
-   * Batch claim multiple unwrapped tokens
-   */
-  const claimBatch = useCallback(async (
-    cTokenAddress: `0x${string}`,
-    ctHashes: `0x${string}`[],
-    decryptedAmounts: bigint[],
-    decryptionSignatures: `0x${string}`[]
-  ) => {
-    setState({ loading: true, error: null });
-
-    try {
-      if (!publicClient) {
-        throw new Error('Public client not available');
-      }
-
-      const claimHash = await writeContractAsync({
-        address: cTokenAddress,
-        abi: CTokenABI,
-        functionName: 'claimUnshieldedBatch',
-        args: [ctHashes, decryptedAmounts, decryptionSignatures],
-      });
-
-      await publicClient.waitForTransactionReceipt({ hash: claimHash });
-
-      setState({ loading: false, error: null });
-      return claimHash;
-    } catch (err) {
-      const error = err instanceof Error ? err : new Error('Failed to claim tokens');
-      setState({ loading: false, error });
-      throw error;
-    }
-  }, [writeContractAsync, publicClient]);
-
+ 
   return {
     wrap,
     unwrap,
-    claim,
-    claimBatch,
+    claim, 
     loading: state.loading,
     error: state.error,
   };
@@ -241,18 +188,7 @@ export function usePendingClaims(userAddress?: `0x${string}`) {
   const chainId = 11155111; // Sepolia
   const deployment = DEPLOYMENTS[chainId];
 
-  const { data: wethClaims, error: wethError } = useReadContract({
-    address: deployment?.cWETH as `0x${string}`,
-    abi: CTokenABI,
-    functionName: 'getUserClaims',
-    args: userAddress ? [userAddress] : undefined,
-    query: {
-      enabled: !!userAddress && !!deployment?.cWETH,
-      refetchInterval: 5000,
-    },
-  }) as { data: Claim[] | undefined; error: Error | null };
-
-  const { data: usdtClaims, error: usdtError } = useReadContract({
+  const { data: cUSDTClaims, error: cUSDTError } = useReadContract({
     address: deployment?.cUSDT as `0x${string}`,
     abi: CTokenABI,
     functionName: 'getUserClaims',
@@ -263,14 +199,23 @@ export function usePendingClaims(userAddress?: `0x${string}`) {
     },
   }) as { data: Claim[] | undefined; error: Error | null };
 
-  // Log for debugging
-  if (wethError) console.error('WETH claims error:', wethError);
-  if (usdtError) console.error('USDT claims error:', usdtError);
-  console.log('Claims data:', { wethClaims, usdtClaims });
+  const { data: cETHClaims, error: cETHError } = useReadContract({
+    address: deployment?.cETH as `0x${string}`,
+    abi: CTokenABI,
+    functionName: 'getUserClaims',
+    args: userAddress ? [userAddress] : undefined,
+    query: {
+      enabled: !!userAddress && !!deployment?.cETH,
+      refetchInterval: 5000,
+    },
+  }) as { data: Claim[] | undefined; error: Error | null };
+
+  if (cUSDTError) console.error('cUSDT claims error:', cUSDTError);
+  if (cETHError) console.error('cETH claims error:', cETHError);
 
   const allClaims = [
-    ...(wethClaims?.map(c => ({ ...c, token: 'cWETH' })) || []),
-    ...(usdtClaims?.map(c => ({ ...c, token: 'cUSDT' })) || []),
+    ...(cUSDTClaims?.map(c => ({ ...c, token: 'cUSDT' })) || []),
+    ...(cETHClaims?.map(c => ({ ...c, token: 'cETH' })) || []),
   ];
 
   // Filter out claimed claims
@@ -294,7 +239,7 @@ export function useAllowance(
     args: userAddress ? [userAddress, cTokenAddress] : undefined,
     query: {
       enabled: !!userAddress,
-      refetchInterval: 3000, // Poll every 3 seconds to catch approval updates
+      refetchInterval: 3000,
     },
   }) as { data: bigint | undefined };
 

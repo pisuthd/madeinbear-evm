@@ -2,11 +2,11 @@ import { useState, useEffect, useCallback } from 'react';
 import { useAccount, usePublicClient } from 'wagmi';
 import { erc20Abi } from 'viem';
 import { FheTypes } from '@cofhe/sdk';
-import { usePendingClaims, type Claim } from '../hooks/useCToken';
+import { usePendingClaims, useCToken, type Claim } from '../hooks/useCToken';
 import { useCoFHE } from '../context/CoFHEContext';
 import { DEPLOYMENTS } from '../constants/deployments';
 import ConvertModal from './ConvertModal';
-import { isCofheError, CofheErrorCode } from '@cofhe/sdk';
+import { isCofheError } from '@cofhe/sdk';
 
 
 interface TokenConfig {
@@ -41,12 +41,12 @@ const TOKENS: TokenConfig[] = [
 ];
 
 const CLAIM_TOKENS: Record<string, { icon: string; name: string; cTokenAddress: `0x${string}` }> = {
-  ccUSDT: {
+  cUSDT: {
     icon: 'https://s2.coinmarketcap.com/static/img/coins/64x64/825.png',
     name: 'Confidential USDT',
     cTokenAddress: DEPLOYMENTS[11155111].cUSDT as `0x${string}`,
   },
-  ccETH: {
+  cETH: {
     icon: 'https://s2.coinmarketcap.com/static/img/coins/64x64/1027.png',
     name: 'Confidential ETH',
     cTokenAddress: DEPLOYMENTS[11155111].cETH as `0x${string}`,
@@ -72,6 +72,7 @@ export default function ConvertSection() {
 
   const { pendingClaims } = usePendingClaims(address);
   const { client: cofheClient, connected } = useCoFHE();
+  const { claim } = useCToken();
 
   const formatBalance = (balance: bigint | undefined, decimals: number) => {
     if (!balance) return '0.00';
@@ -138,10 +139,6 @@ export default function ConvertSection() {
 
       if (isCofheError(err)) {
         console.error(err.code, err.message);
-        if (err.code === CofheErrorCode.PermitNotFound || err.code === CofheErrorCode.PermitInvalid) {
-          await cofheClient.permits.getOrCreateSelfPermit();
-          // retry
-        }
       }
 
       // console.warn('Failed to get confidential balance:', error);
@@ -226,9 +223,6 @@ export default function ConvertSection() {
         throw new Error('Decryption failed - no signature returned');
       }
 
-      // Import claim function dynamically to avoid circular deps
-      const { useCToken } = await import('../hooks/useCToken');
-      const { claim } = useCToken();
       const tokenInfo = CLAIM_TOKENS[claimData.token];
       await claim(
         tokenInfo.cTokenAddress,

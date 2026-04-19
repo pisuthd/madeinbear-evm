@@ -83,7 +83,7 @@ export default function ConvertModal({
         await wrap(token.cTokenAddress, amountInWei, address);
         setSuccess(`Wrapped ${amount} ${token.symbol}!`);
       } else {
-        await unwrap(token.cTokenAddress, amountInWei, address, amountInWei);
+        await unwrap(token.cTokenAddress, amountInWei, address);
         setSuccess(`Unwrapping ${amount} ${token.cSymbol}...`);
       }
 
