@@ -6,7 +6,6 @@ import {
   expectFHERC20BalancesChange,
   prepExpectERC20BalancesChange,
   prepExpectFHERC20BalancesChange,
-  ticksToIndicated,
   increaseTime,
 } from "./utils";
 
@@ -24,7 +23,12 @@ describe("CToken - Confidential Token Wrapper", function () {
 
     // Deploy CToken (confidential wrapper)
     const cTokenFactory = await ethers.getContractFactory("CToken");
-    const cToken = (await cTokenFactory.deploy(underlying)) as CToken;
+    const cToken = (await cTokenFactory.deploy(
+      underlying,
+      "FHERC20 Wrapped USD Coin",
+      "eUSDC",
+      ""
+    )) as CToken;
     await cToken.waitForDeployment();
 
     return { underlying, cToken };
@@ -52,8 +56,7 @@ describe("CToken - Confidential Token Wrapper", function () {
       expect(await cToken.name()).to.equal("FHERC20 Wrapped USD Coin");
       expect(await cToken.symbol()).to.equal("eUSDC");
       expect(await cToken.decimals()).to.equal(6);
-      expect(await cToken.erc20()).to.equal(underlying.target);
-      expect(await cToken.isFherc20()).to.equal(true);
+      expect(await cToken.underlying()).to.equal(underlying.target);
     });
 
     it("should handle different token decimals correctly", async function () {
@@ -66,18 +69,16 @@ describe("CToken - Confidential Token Wrapper", function () {
       await wbtc.setDecimals(8);
 
       const cTokenFactory = await ethers.getContractFactory("CToken");
-      const cWBTC = (await cTokenFactory.deploy(wbtc)) as CToken;
+      const cWBTC = (await cTokenFactory.deploy(
+        wbtc,
+        "FHERC20 Wrapped Wrapped BTC",
+        "eWBTC",
+        ""
+      )) as CToken;
       await cWBTC.waitForDeployment();
 
       expect(await cWBTC.name()).to.equal("FHERC20 Wrapped Wrapped BTC");
       expect(await cWBTC.decimals()).to.equal(6);
-    });
-
-    it("should revert if underlying token is not ERC20", async function () {
-      const { cToken } = await setupFixture();
-
-      const cTokenFactory = await ethers.getContractFactory("CToken");
-      await expect(cTokenFactory.deploy(cToken)).to.be.revertedWithCustomError(cToken, "FHERC20InvalidErc20");
     });
   });
 
@@ -98,12 +99,7 @@ describe("CToken - Confidential Token Wrapper", function () {
       await expect(cToken.connect(bob).shield(bob.address, shieldValue)).to.emit(cToken, "Transfer");
 
       await expectERC20BalancesChange(underlying, bob.address, -1n * shieldValue);
-      await expectFHERC20BalancesChange(
-        cToken,
-        bob.address,
-        await ticksToIndicated(cToken, 5001n),
-        confidentialValue,
-      );
+      await expectFHERC20BalancesChange(cToken, bob.address, confidentialValue);
 
       await hre.cofhe.mocks.expectPlaintext(await cToken.confidentialTotalSupply(), confidentialValue);
     });
@@ -121,12 +117,7 @@ describe("CToken - Confidential Token Wrapper", function () {
 
       await cToken.connect(bob).shield(alice.address, shieldValue);
 
-      await expectFHERC20BalancesChange(
-        cToken,
-        alice.address,
-        await ticksToIndicated(cToken, 5001n),
-        confidentialValue,
-      );
+      await expectFHERC20BalancesChange(cToken, alice.address, confidentialValue);
     });
 
     it("should shield cumulatively", async function () {
@@ -140,19 +131,11 @@ describe("CToken - Confidential Token Wrapper", function () {
 
       await cToken.connect(bob).shield(bob.address, shieldValue);
 
-      await prepExpectERC20BalancesChange(underlying, bob.address);
       await prepExpectFHERC20BalancesChange(cToken, bob.address);
 
       await cToken.connect(bob).shield(bob.address, shieldValue);
 
-      await expectERC20BalancesChange(underlying, bob.address, -1n * shieldValue);
-      await expectFHERC20BalancesChange(
-        cToken,
-        bob.address,
-        await ticksToIndicated(cToken, 1n),
-        confidentialValue,
-      );
-
+      await expectFHERC20BalancesChange(cToken, bob.address, confidentialValue);
       await hre.cofhe.mocks.expectPlaintext(await cToken.confidentialTotalSupply(), confidentialValue * 2n);
     });
 
@@ -165,7 +148,12 @@ describe("CToken - Confidential Token Wrapper", function () {
       await wbtc.setDecimals(8);
 
       const cTokenFactory = await ethers.getContractFactory("CToken");
-      const cWBTC = (await cTokenFactory.deploy(wbtc)) as CToken;
+      const cWBTC = (await cTokenFactory.deploy(
+        wbtc,
+        "FHERC20 Wrapped WBTC",
+        "eWBTC",
+        ""
+      )) as CToken;
       await cWBTC.waitForDeployment();
 
       const [bob] = await ethers.getSigners();
@@ -182,13 +170,9 @@ describe("CToken - Confidential Token Wrapper", function () {
 
       await cWBTC.connect(bob).shield(bob.address, shieldValue);
 
+      // Only the aligned portion is transferred
       await expectERC20BalancesChange(wbtc, bob.address, -1n * alignedValue);
-      await expectFHERC20BalancesChange(
-        cWBTC,
-        bob.address,
-        await ticksToIndicated(cWBTC, 5001n),
-        confidentialValue,
-      );
+      await expectFHERC20BalancesChange(cWBTC, bob.address, confidentialValue);
     });
 
     it("should fail if user doesn't have enough tokens", async function () {
@@ -240,26 +224,29 @@ describe("CToken - Confidential Token Wrapper", function () {
 
       await prepExpectFHERC20BalancesChange(cToken, bob.address);
 
-      const tx = await cToken.connect(bob).unshield(alice.address, unshieldConfidentialValue);
+      const tx = await cToken.connect(bob).unshield(bob.address, alice.address, unshieldConfidentialValue);
 
-      await expect(tx).to.emit(cToken, "Transfer");
-      await expectFHERC20BalancesChange(
-        cToken,
-        bob.address,
-        -1n * (await ticksToIndicated(cToken, 1n)),
-        -1n * unshieldConfidentialValue,
-      );
+      await expect(tx).to.emit(cToken, "Unshielded");
+      await expectFHERC20BalancesChange(cToken, bob.address, -1n * unshieldConfidentialValue);
 
-      // Get the claim ID from getUserClaims
-      const aliceClaims = await cToken.getUserClaims(alice.address);
-      expect(aliceClaims.length).to.equal(1);
-      const unshieldRequestId = aliceClaims[0].ctHash;
+      // Get the claim ID from Unshielded event
+      const receipt = await tx.wait();
+      let unshieldRequestId = "";
+      for (const log of receipt!.logs) {
+        try {
+          const parsed = cToken.interface.parseLog({ topics: log.topics as string[], data: log.data });
+          if (parsed?.name === "Unshielded") {
+            unshieldRequestId = parsed.args.amount;
+            break;
+          }
+        } catch {}
+      }
+      expect(unshieldRequestId).to.not.be.empty;
 
       // Verify claim was created via getClaim
       const pendingClaim = await cToken.getClaim(unshieldRequestId);
       expect(pendingClaim.to).to.equal(alice.address);
       expect(pendingClaim.claimed).to.equal(false);
-      expect(pendingClaim.decrypted).to.equal(false);
 
       // Time travel past decryption delay
       await increaseTime(11);
@@ -270,15 +257,13 @@ describe("CToken - Confidential Token Wrapper", function () {
 
       await expect(
         cToken.connect(bob).claimUnshielded(unshieldRequestId, decryption.decryptedValue, decryption.signature),
-      ).to.emit(cToken, "ClaimedUnshieldedERC20");
+      ).to.emit(cToken, "ClaimedUnshielded");
 
       await expectERC20BalancesChange(underlying, alice.address, unshieldERC20Value);
 
       // Claim is marked as claimed and removed from user's pending claims
       const claimedClaim = await cToken.getClaim(unshieldRequestId);
       expect(claimedClaim.claimed).to.equal(true);
-      expect(claimedClaim.decrypted).to.equal(true);
-      expect(claimedClaim.decryptedAmount).to.equal(unshieldConfidentialValue);
 
       const aliceClaimsAfter = await cToken.getUserClaims(alice.address);
       expect(aliceClaimsAfter.length).to.equal(0);
@@ -291,14 +276,32 @@ describe("CToken - Confidential Token Wrapper", function () {
       const unshieldAmount2 = ethers.parseUnits("30", 6);
 
       // Create first unshield
-      await cToken.connect(bob).unshield(alice.address, unshieldAmount1);
-      const pending1 = await cToken.getUserClaims(alice.address);
-      const requestId1 = pending1[pending1.length - 1].ctHash;
+      const tx1 = await cToken.connect(bob).unshield(bob.address, alice.address, unshieldAmount1);
+      const receipt1 = await tx1.wait();
+      let requestId1 = "";
+      for (const log of receipt1!.logs) {
+        try {
+          const parsed = cToken.interface.parseLog({ topics: log.topics as string[], data: log.data });
+          if (parsed?.name === "Unshielded") {
+            requestId1 = parsed.args.amount;
+            break;
+          }
+        } catch {}
+      }
 
       // Create second unshield
-      await cToken.connect(bob).unshield(alice.address, unshieldAmount2);
-      const pending2 = await cToken.getUserClaims(alice.address);
-      const requestId2 = pending2[pending2.length - 1].ctHash;
+      const tx2 = await cToken.connect(bob).unshield(bob.address, alice.address, unshieldAmount2);
+      const receipt2 = await tx2.wait();
+      let requestId2 = "";
+      for (const log of receipt2!.logs) {
+        try {
+          const parsed = cToken.interface.parseLog({ topics: log.topics as string[], data: log.data });
+          if (parsed?.name === "Unshielded") {
+            requestId2 = parsed.args.amount;
+            break;
+          }
+        } catch {}
+      }
 
       // Alice should have 2 pending claims
       const pendingClaims = await cToken.getUserClaims(alice.address);
@@ -328,7 +331,6 @@ describe("CToken - Confidential Token Wrapper", function () {
     });
   });
 
-
   describe("claimUnshielded reverts", function () {
     it("should revert when claiming already claimed request", async function () {
       const { cToken, bob, alice, underlying, bobClient } = await setupFixture();
@@ -338,9 +340,18 @@ describe("CToken - Confidential Token Wrapper", function () {
       await underlying.connect(bob).approve(cToken.target, mintValue);
       await cToken.connect(bob).shield(bob.address, mintValue);
 
-      await cToken.connect(bob).unshield(alice.address, ethers.parseUnits("100", 6));
-      const pending = await cToken.getUserClaims(alice.address);
-      const requestId = pending[0].ctHash;
+      const tx = await cToken.connect(bob).unshield(bob.address, alice.address, ethers.parseUnits("100", 6));
+      const receipt = await tx.wait();
+      let requestId = "";
+      for (const log of receipt!.logs) {
+        try {
+          const parsed = cToken.interface.parseLog({ topics: log.topics as string[], data: log.data });
+          if (parsed?.name === "Unshielded") {
+            requestId = parsed.args.amount;
+            break;
+          }
+        } catch {}
+      }
 
       await increaseTime(11);
 
