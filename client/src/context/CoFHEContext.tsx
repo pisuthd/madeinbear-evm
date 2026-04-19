@@ -58,12 +58,10 @@ export function CoFHEProvider({ children }: { children: React.ReactNode }) {
       // Create or get the permit after connecting
       const permit = await client.permits.getOrCreateSelfPermit();
  
-
       if (permit) {
         setPermitReady(true);
       } 
-      
-      
+           
       setConnected(true);
       setError(null);
     } catch (err) {

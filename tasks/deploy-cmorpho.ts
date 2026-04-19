@@ -107,44 +107,6 @@ task('deploy-cmorpho', 'Deploy the CMorpho Confidential Lending protocol to the 
 		console.log(`CMorpho deployed to: ${cMorphoAddress}`)
 		saveDeployment(network.name, 'CMorpho', cMorphoAddress)
 
-		// ========== Step 6: Enable IRM and LLTV ==========
-		console.log('\n--- Step 6: Enabling IRM and LLTV on CMorpho ---')
-
-		await cMorpho.enableIrm(ethIrmAddress)
-		console.log(`IRM enabled: ${ethIrmAddress}`)
-
-		await cMorpho.enableLltv(ETH_LLTV)
-		console.log(`LLTV enabled: ${ETH_LLTV} (75%)`)
-
-		// ========== Step 7: Create Market ==========
-		console.log('\n--- Step 7: Creating Market ---')
-
-		const marketParams = {
-			loanToken: cUSDTAddress,
-			collateralToken: cETHAddress,
-			oracle: ethOracleAddress,
-			irm: ethIrmAddress,
-			lltv: ETH_LLTV,
-		}
-
-		const { AbiCoder } = ethers
-		const marketId = ethers.keccak256(
-			AbiCoder.defaultAbiCoder().encode(
-				['address', 'address', 'address', 'address', 'uint256'],
-				[marketParams.loanToken, marketParams.collateralToken, marketParams.oracle, marketParams.irm, marketParams.lltv],
-			),
-		)
-
-		await cMorpho.createMarket(marketParams)
-		console.log(`Market created with ID: ${marketId}`)
-		saveDeployment(network.name, 'MarketId', marketId)
-
-		// ========== Step 8: Whitelist deployer on Oracle ==========
-		console.log('\n--- Step 8: Whitelisting deployer on Oracle ---')
-
-		await ethOracle.addToWhitelist(deployer.address)
-		console.log(`Deployer whitelisted on PriceOracle`)
-
 		// ========== Summary ==========
 		console.log('\n========================================')
 		console.log('🎉 CMorpho Protocol Deployed!')
@@ -158,7 +120,6 @@ task('deploy-cmorpho', 'Deploy the CMorpho Confidential Lending protocol to the 
 		console.log(`  JumpRateIrm: ${ethIrmAddress}`)
 		console.log(`  PriceOracle: ${ethOracleAddress}`)
 		console.log(`  CMorpho:     ${cMorphoAddress}`)
-		console.log(`  Market ID:  ${marketId}`)
 		console.log('========================================\n')
 
 		return {
@@ -168,8 +129,6 @@ task('deploy-cmorpho', 'Deploy the CMorpho Confidential Lending protocol to the 
 			cETH: cETHAddress,
 			ethIrm: ethIrmAddress,
 			ethOracle: ethOracleAddress,
-			cMorpho: cMorphoAddress,
-			marketId: marketId,
-			marketParams,
+			cMorpho: cMorphoAddress
 		}
 	})

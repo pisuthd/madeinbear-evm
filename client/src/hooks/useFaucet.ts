@@ -1,9 +1,10 @@
 import { useCallback, useState } from 'react';
-import { useWriteContract, usePublicClient } from 'wagmi';
-import { DEPLOYMENTS } from '../constants/deployments';
+import { useWriteContract, usePublicClient, useReadContract } from 'wagmi';
+import { erc20Abi } from 'viem';
+import { DEPLOYMENTS, getMockTokenMetadata } from '../constants/deployments';
 
 // Minimal ABI for minting mock tokens
-const MOCK_ERC20_ABI = [
+const MINT_ABI = [
   {
     type: 'function',
     name: 'mint',
@@ -34,7 +35,6 @@ export function useFaucet() {
     setState({ loading: true, error: null });
 
     try {
-      // If no recipient provided, we can't mint - wallet address should be passed
       if (!recipientAddress) {
         throw new Error('Recipient address required');
       }
@@ -43,15 +43,13 @@ export function useFaucet() {
         throw new Error('Public client not available');
       }
 
-      // Submit transaction
       const hash = await writeContractAsync({
         address: tokenAddress,
-        abi: MOCK_ERC20_ABI,
+        abi: MINT_ABI,
         functionName: 'mint',
         args: [recipientAddress, amount],
       });
 
-      // Wait for transaction to be included in a block
       await publicClient.waitForTransactionReceipt({ hash });
 
       setState({ loading: false, error: null });
@@ -65,37 +63,78 @@ export function useFaucet() {
   return { mintTokens, loading: state.loading, error: state.error };
 }
 
-// Convenience hooks for specific tokens
-export function useWETHFaucet() {
+// Hook for a specific mock token
+export function useMockTokenFaucet(tokenAddress: `0x${string}`, address?: `0x${string}`) {
   const { mintTokens, loading, error } = useFaucet();
+  const tokenMeta = getMockTokenMetadata(tokenAddress);
   
-  const mintWETH = useCallback(async (
-    recipientAddress: `0x${string}`,
-    amount: bigint = BigInt(10) * BigInt(10 ** 18) // Default 10 WETH
-  ) => {
-    return mintTokens(
-      DEPLOYMENTS[11155111].WETH as `0x${string}`,
-      amount,
-      recipientAddress
-    );
-  }, [mintTokens]);
+  // Read current balance - use address if provided, otherwise balance will be 0
+  const { data: balance, refetch } = useReadContract({
+    address: tokenAddress,
+    abi: erc20Abi,
+    functionName: 'balanceOf',
+    args: address ? [address] : undefined,
+    query: {
+      enabled: !!address,
+    },
+  });
 
-  return { mintWETH, loading, error };
+  const mint = useCallback(async (recipientAddress: `0x${string}`) => {
+    if (!tokenMeta) throw new Error('Token not found');
+    await mintTokens(tokenAddress, tokenMeta.mintAmount, recipientAddress);
+    // Refetch balance after successful mint
+    await refetch();
+  }, [mintTokens, tokenAddress, tokenMeta, refetch]);
+
+  return { 
+    mint, 
+    loading, 
+    error,
+    balance: balance ?? 0n,
+    decimals: tokenMeta?.decimals ?? 6,
+    symbol: tokenMeta?.symbol ?? '???',
+    name: tokenMeta?.name ?? 'Unknown',
+    icon: tokenMeta?.icon ?? '',
+    mintAmount: tokenMeta?.mintAmount ?? 0n,
+    refetch,
+  };
 }
 
-export function useUSDTFaucet() {
-  const { mintTokens, loading, error } = useFaucet();
+// Hook for all mock tokens
+export function useAllMockTokens(address?: `0x${string}`) {
+  const deployment = DEPLOYMENTS[11155111];
   
-  const mintUSDT = useCallback(async (
-    recipientAddress: `0x${string}`,
-    amount: bigint = BigInt(10000) * BigInt(10 ** 18) // Default 10,000 USDT
-  ) => {
-    return mintTokens(
-      DEPLOYMENTS[11155111].USDT as `0x${string}`,
-      amount,
-      recipientAddress
-    );
-  }, [mintTokens]);
+  const tokenAddresses = [
+    deployment.MockUSDT as `0x${string}`,
+    deployment.MockETH as `0x${string}`,
+  ];
 
-  return { mintUSDT, loading, error };
+  return tokenAddresses.map((tokenAddress) => {
+    const tokenMeta = getMockTokenMetadata(tokenAddress);
+    const { 
+      mint, 
+      loading, 
+      error,
+      balance,
+      decimals,
+      symbol,
+      name,
+      icon,
+      refetch,
+    } = useMockTokenFaucet(tokenAddress, address);
+    
+    return {
+      address: tokenAddress,
+      mint,
+      mintLoading: loading,
+      mintError: error,
+      balance,
+      decimals,
+      symbol,
+      name,
+      icon,
+      mintAmount: tokenMeta?.mintAmount ?? 0n,
+      refetch,
+    };
+  });
 }

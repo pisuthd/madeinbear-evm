@@ -26,26 +26,38 @@ function Hero() {
 
             {/* Main Headline */}
             <h1 className="text-3xl md:text-4xl lg:text-[56px] font-bold mb-4 leading-tight text-[#f8fafc] tracking-tight">
-              A Fully On-Chain Bank for Digital Assets
+              A Privacy Neobank for Digital Assets 
             </h1> 
             {/* Description */}
-            <p className="text-base md:text-xl text-[#cbd5e1] mb-8 font-semibold max-w-xl leading-relaxed">
-              A complete banking system on-chain — deposits, credit, and investment accounts, powered by Fhenix with ERC-7984 confidential tokens
+            <p className="text-base md:text-xl text-[#cbd5e1] mb-8 max-w-xl leading-relaxed">
+              Confidential banking for digital assets powered by Fhenix FHE. Supply, borrow, and invest with ERC-7984 tokens and selective disclosure for compliant finance.
             </p>
             {/* CTA Buttons */}
-            <div className="flex flex-col sm:flex-row gap-4 mb-12">
+            <div className="flex flex-col sm:flex-row gap-4 mb-6">
               <Link
-                to="/dashboard"
+                to="/earn"
                 className="px-8 py-4 bg-[#3eddfd] text-[#0f172a] font-semibold rounded-lg transition-all hover:bg-[#2dd4d4] hover:shadow-[0_0_30px_rgba(62,223,223,0.4)] hover:-translate-y-0.5 text-center"
               >
-                Open Account
+                Supply Assets
               </Link>
               <Link
-                to="/credentials"
+                to="/borrow"
                 className="px-8 py-4 bg-[#1e293b] text-[#3eddfd] font-semibold rounded-lg transition-all hover:bg-[#334155] hover:shadow-[0_0_20px_rgba(62,223,223,0.2)] border border-[#3eddfd]/30 text-center"
               >
-                View Rates
+                Take a Loan
               </Link>
+            </div>
+
+            {/* Live Badge */}
+            <div className="flex items-center gap-2">
+              <img 
+                src="https://s2.coinmarketcap.com/static/img/coins/64x64/1027.png" 
+                alt="Ethereum" 
+                className="w-5 h-5"
+              />
+              <span className="text-sm text-[#94a3b8]">
+                Now Live on Sepolia Testnet
+              </span>
             </div>
 
           </div>

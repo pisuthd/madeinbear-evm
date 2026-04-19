@@ -17,7 +17,7 @@ function Footer() {
               MadeInBear
             </Link>
             <p className="text-[#94a3b8] text-sm leading-relaxed">
-              A Fully On-Chain Bank for Digital Assets 
+              A Privacy Neobank for Digital Assets
             </p>
           </div>
 
@@ -30,7 +30,7 @@ function Footer() {
                   to="/dashboard"
                   className="text-[#94a3b8] hover:text-[#3eddfd] transition-colors text-sm"
                 >
-                  Dashboard
+                  Open Account
                 </Link>
               </li>
               <li>

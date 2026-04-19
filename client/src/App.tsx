@@ -3,6 +3,7 @@ import Header from './components/Header';
 import Footer from './components/Footer';
 import Home from './pages/Home';
 import Dashboard from './pages/Dashboard';
+import Portfolio from './pages/Portfolio';
 import Credentials from './pages/Credentials';
 import AskAI from './pages/AskAI';
 import { CoFHEProvider } from './context/CoFHEContext';
@@ -16,6 +17,7 @@ function App() {
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/portfolio" element={<Portfolio />} />
             <Route path="/credentials" element={<Credentials />} />
             <Route path="/ask-ai" element={<AskAI />} />
           </Routes>
