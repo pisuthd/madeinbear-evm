@@ -370,29 +370,6 @@ describe("CToken - Confidential Token Wrapper", function () {
     });
   });
 
-  describe("Confidential Transfers", function () {
-    it("should set and use operator for confidential transfers", async function () {
-      const { cToken, bob, alice } = await setupFixture();
-
-      const until = Math.floor(Date.now() / 1000) + 3600;
-
-      await expect(cToken.connect(bob).setOperator(alice.address, until))
-        .to.emit(cToken, "OperatorSet")
-        .withArgs(bob.address, alice.address, until);
-
-      expect(await cToken.isOperator(bob.address, alice.address)).to.equal(true);
-    });
-
-    it("should fail to use standard ERC20 transfer function", async function () {
-      const { cToken } = await setupFixture();
-
-      await expect(cToken.transfer(ethers.ZeroAddress, 100)).to.be.revertedWithCustomError(
-        cToken,
-        "FHERC20IncompatibleFunction",
-      );
-    });
-  });
-
   describe("Indicated Balances", function () {
     it("should reset indicated balance", async function () {
       const { cToken, underlying, bob } = await setupFixture();

@@ -1,36 +1,22 @@
 {
-	"name": "cofhe-hardhat-starter",
-	"version": "0.3.1",
-	"description": "Starter repository for Fhenix CoFHE contract development",
+	"name": "MadeInBear",
+	"version": "0.1.1",
+	"description": "On-chain Bank with Fhenix CoFHE",
 	"scripts": {
 		"test": "REPORT_GAS=true hardhat test",
 		"clean": "rimraf ./artifacts ./cache ./coverage ./types ./coverage.json ./deployments/localcofhe",
 		"compile": "hardhat compile",
 		"postinstall": "patch-package",
-		"deploy-compound": "hardhat deploy-compound",
-		"eth-sepolia:deploy-compound": "hardhat deploy-compound --network eth-sepolia",
-		"deploy-ctoken": "hardhat deploy-ctoken",
-		"eth-sepolia:deploy-ctoken": "hardhat deploy-ctoken --network eth-sepolia",
-		"--------------": "",
-		" --- cofhe ---": "",
-		"  --------------": "",
-		"// task:deploy": "hardhat deploy",
-		"// task:addCount": "hardhat task:addCount",
-		"// task:getCount": "hardhat task:getCount",
-		"// ------------------- ": "",
-		"//  --- localcofhe ---": "",
-		"//    -------------------": "",
-		"// localcofhe:start": "hardhat localcofhe:start --clean true",
-		"localcofhe:test": "REPORT_GAS=true hardhat test --network localcofhe",
-		"localcofhe:faucet": "hardhat task:cofhe:usefaucet --network localcofhe",
-		"// localcofhe:deploy": "hardhat deploy --network localcofhe",
-		"// localcofhe:stop": "hardhat localcofhe:stop"
+		"deploy-cmorpho": "hardhat deploy-cmorpho",
+		"eth-sepolia:deploy-cmorpho": "hardhat deploy-cmorpho --network eth-sepolia",
+		"create-market": "hardhat create-market",
+		"eth-sepolia:create-market": "hardhat create-market --network eth-sepolia"
 	},
 	"repository": {
 		"type": "git",
 		"url": "git+https://github.com/fhenixprotocol/cofhe-hardhat-starter.git"
 	},
-	"author": "Fhenix",
+	"author": "Pisuth D.",
 	"license": "MIT",
 	"bugs": {
 		"url": "https://github.com/fhenixprotocol/cofhe-hardhat-starter/issues"
