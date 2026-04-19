@@ -10,8 +10,7 @@ const USDT_USD = 10n ** 18n; // 1 USDT = $1
 
 /// LLTV values (WAD scale)
 const ETH_LLTV = 750000000000000000n; // 75% = 0.75 * 10^18
-
-// TODO: set mock token to 6 decimals 
+ 
 
 describe("CMorpho - Confidential Lending E2E", function () {
   // ============ Types ============
@@ -52,10 +51,10 @@ describe("CMorpho - Confidential Lending E2E", function () {
 
     // 2. Deploy CToken wrappers (FHERC20WrappedERC20)
     const cTokenFactory = await ethers.getContractFactory("CToken");
-    const cUSDT = (await cTokenFactory.deploy(usdt)) as CToken;
+    const cUSDT = (await cTokenFactory.deploy(usdt, "Confidential USDT", "cUSDT", "")) as CToken;
     await cUSDT.waitForDeployment();
 
-    const cETH = (await cTokenFactory.deploy(eth)) as CToken;
+    const cETH = (await cTokenFactory.deploy(eth, "Confidential ETH", "cETH", "")) as CToken;
     await cETH.waitForDeployment();
 
     // 3. Deploy Interest Rate Model

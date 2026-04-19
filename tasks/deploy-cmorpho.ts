@@ -49,14 +49,14 @@ task('deploy-cmorpho', 'Deploy the CMorpho Confidential Lending protocol to the 
 
 		const CToken = await ethers.getContractFactory('CToken')
 
-		const cUSDT = await CToken.deploy(usdtAddress)
+		const cUSDT = await CToken.deploy(usdtAddress, "Confidential USDT", "cUSDT", "")
 		await cUSDT.waitForDeployment()
 		const cUSDTAddress = await cUSDT.getAddress()
 		console.log(`cUSDT deployed to: ${cUSDTAddress}`)
 		console.log(`  Underlying USDT: ${usdtAddress}`)
 		saveDeployment(network.name, 'cUSDT', cUSDTAddress)
 
-		const cETH = await CToken.deploy(ethAddress)
+		const cETH = await CToken.deploy(ethAddress, "Confidential ETH", "cETH", "")
 		await cETH.waitForDeployment()
 		const cETHAddress = await cETH.getAddress()
 		console.log(`cETH deployed to: ${cETHAddress}`)
