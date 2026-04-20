@@ -3,7 +3,6 @@ import { useWriteContract, useReadContract, usePublicClient } from 'wagmi';
 import { CTokenABI } from '../abis/CToken';
 import { erc20Abi } from 'viem';
 import { DEPLOYMENTS } from '../constants/deployments';
-import { addBalance, subtractBalance } from '../utils/confidentialBalances';
 
 interface CTokenHookState {
   loading: boolean;

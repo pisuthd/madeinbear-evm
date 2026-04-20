@@ -1,10 +1,8 @@
 import { useCallback, useState } from 'react';
-import { useAccount, useWriteContract, usePublicClient, useReadContract } from 'wagmi';
+import { useAccount, useWriteContract, usePublicClient } from 'wagmi';
 import { useCoFHE } from '../context/CoFHEContext';
-import { FheTypes } from '@cofhe/sdk';
 import { DEPLOYMENTS } from '../constants/deployments';
 import { encodeAbiParameters, keccak256 } from 'viem';
-import { connectorsForWallets } from '@rainbow-me/rainbowkit';
 
 // CMORPHO ABI - includes both read and write functions
 const CMORPHO_ABI = [
@@ -265,6 +263,7 @@ export function useSupply() {
         functionName: 'isOperator',
         args: [address, cMorphoAddress],
       }) as boolean;
+ 
 
       // Step 2: If not operator, set CMorpho as operator
       if (!isOperator) {
@@ -275,6 +274,7 @@ export function useSupply() {
           abi: CTOKEN_ABI,
           functionName: 'setOperator',
           args: [cMorphoAddress, operatorUntil],
+          gas: 15_000_000n,
         });
         await publicClient.waitForTransactionReceipt({ hash: setOperatorHash });
         console.log('Operator set successfully');
@@ -349,13 +349,7 @@ export function useWithdraw() {
         abi: CMORPHO_ABI,
         functionName: 'withdraw',
         args: [
-          [
-            marketParams.loanToken,
-            marketParams.collateralToken,
-            marketParams.oracle,
-            marketParams.irm,
-            marketParams.lltv,
-          ],
+          marketParams,
           amount,
           0n, // shares = 0 means we pass assets, not shares
           address, // onBehalf
@@ -410,13 +404,7 @@ export function useBorrow() {
         abi: CMORPHO_ABI,
         functionName: 'borrow',
         args: [
-          [
-            marketParams.loanToken,
-            marketParams.collateralToken,
-            marketParams.oracle,
-            marketParams.irm,
-            marketParams.lltv,
-          ],
+          marketParams,
           amount,
           0n, // shares = 0 means we pass assets, not shares
           address, // onBehalf
@@ -684,9 +672,12 @@ export function useSetOperator() {
         address: cTokenAddress,
         abi: CTOKEN_ABI,
         functionName: 'setOperator',
-        args: [operatorAddress, BigInt(operatorUntil)],
+        args: [operatorAddress, operatorUntil],
       });
 
+      if (!publicClient) {
+        throw new Error('Public client not available');
+      }
       await publicClient.waitForTransactionReceipt({ hash });
       
       setState({ loading: false, error: null });

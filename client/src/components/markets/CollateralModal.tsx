@@ -187,15 +187,7 @@ export default function CollateralModal({ isOpen, onClose, onSuccess }: Collater
             View transaction →
           </a>
         )}
-
-        {/* Warning */}
-        <div className="mt-4 p-3 bg-[#f59e0b]/10 border border-[#f59e0b]/20 rounded-lg">
-          <div className="text-[#f59e0b] text-sm font-medium mb-1">⚠️ Important</div>
-          <div className="text-[#94a3b8] text-xs">
-            Deposited collateral is locked and used as security for borrowing. 
-            You can withdraw when your health factor is safe.
-          </div>
-        </div>
+ 
       </div>
     </div>
   );

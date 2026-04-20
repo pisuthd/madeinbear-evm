@@ -4,10 +4,8 @@ import { Link } from 'react-router-dom';
 import { ConnectButton } from '@rainbow-me/rainbowkit';
 import MockTokenFaucet from '../components/MockTokenFaucet';
 import ConvertSection from '../components/ConvertSection';
-import { useCTokenBalance } from '../hooks/useCTokenBalance';
 import { useMarketInfo } from '../hooks/useMarketInfo';
 import { useUserCollateralPosition } from '../hooks/useCMorphoPosition';
-import { DEPLOYMENTS } from '../constants/deployments';
 import { PRICES } from '../utils/prices';
 
 const LTV_PERCENT = 75;

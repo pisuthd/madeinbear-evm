@@ -27,7 +27,7 @@ function InputSkeleton() {
 }
 
 export default function SupplyUSDT() {
-  const { marketData, supplyAPY, utilization, loading: marketLoading } = useMarketInfo();
+  const { marketData, supplyAPY, loading: marketLoading } = useMarketInfo();
   const marketParams = getUSDTMarketParams();
   const cUSDTAddress = DEPLOYMENTS[11155111]?.cUSDT as `0x${string}`;
   const { balance: cUSDTBalance, loading: balanceLoading, refresh: refreshBalance } = useCTokenBalance(cUSDTAddress);

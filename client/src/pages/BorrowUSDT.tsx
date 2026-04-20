@@ -53,12 +53,12 @@ export default function BorrowUSDT() {
   const [txHash, setTxHash] = useState<string | null>(null);
   const [txType, setTxType] = useState<'borrow' | 'repay' | null>(null);
 
-  const { marketData, borrowAPY, lltvPercent, loading: marketLoading } = useMarketInfo();
+  const { borrowAPY, loading: marketLoading } = useMarketInfo();
   const marketParams = getUSDTMarketParams();
   const cUSDTAddress = DEPLOYMENTS[11155111]?.cUSDT as `0x${string}`;
   const cETHAddress = DEPLOYMENTS[11155111]?.cETH as `0x${string}`;
   const { balance: cUSDTBalance, refresh: refreshUSDTBalance } = useCTokenBalance(cUSDTAddress);
-  const { balance: cETHBalance, loading: balanceLoading, refresh: refreshETHBalance } = useCTokenBalance(cETHAddress);
+  const { loading: balanceLoading, refresh: refreshETHBalance } = useCTokenBalance(cETHAddress);
 
   // Get user's borrow position
   const { borrowAssets: userBorrow, collateral: userCollateral, loading: positionLoading, refetch: refetchPosition } = useUserCollateralPosition();
