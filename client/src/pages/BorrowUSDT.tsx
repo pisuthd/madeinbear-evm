@@ -24,14 +24,14 @@ function calculateHealthFactor(collateral: bigint, borrow: bigint): number {
 function getHealthFactorColor(hf: number): string {
   if (hf === Infinity || hf > 2) return 'text-[#10b981]'; // green - very safe
   if (hf >= 1.5) return 'text-[#10b981]'; // green - safe
-  if (hf >= 1.0) return 'text-[#f59e0b]'; // yellow - warning
+  if (hf >= 1.0) return 'text-[#f59e0b]'; // yellow - warning (keep for health factor)
   return 'text-[#ef4444]'; // red - liquidation risk
 }
 
 // Skeleton loading component
 function StatCardSkeleton() {
   return (
-    <div className="bg-[#1e293b]/50 border border-[#f59e0b]/20 rounded-xl p-6 animate-pulse">
+    <div className="bg-[#1e293b]/50 border border-[#3eddfd]/10 rounded-xl p-6 animate-pulse">
       <div className="h-4 bg-[#0f172a] rounded w-24 mb-2"></div>
       <div className="h-8 bg-[#0f172a] rounded w-32 mb-2"></div>
       <div className="h-4 bg-[#0f172a] rounded w-16"></div>
@@ -178,7 +178,7 @@ export default function BorrowUSDT() {
                 href={`https://sepolia.etherscan.io/tx/${txHash}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-[#f59e0b] hover:underline text-sm flex items-center gap-1"
+                className="text-[#3eddfd] hover:underline text-sm flex items-center gap-1"
               >
                 View on Etherscan
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -201,16 +201,16 @@ export default function BorrowUSDT() {
           ) : (
             <>
               {/* Your Borrow */}
-              <div className="bg-[#1e293b]/50 border border-[#f59e0b]/20 rounded-xl p-6">
+              <div className="bg-[#1e293b]/50 border border-[#3eddfd]/10 rounded-xl p-6">
                 <div className="text-[#94a3b8] text-sm mb-2">Your Borrow</div>
-                <div className="text-[#ef4444] text-2xl font-bold">{formatAmount(userBorrow)}</div>
+                <div className="text-[#f8fafc] text-2xl font-bold">{formatAmount(userBorrow)}</div>
                 <div className="text-[#94a3b8] text-sm">cUSDT ({formatUSD(userBorrow ?? 0n, 'USDT')})</div>
               </div>
 
               {/* Your Collateral - Clickable */}
               <div
                 onClick={() => setShowCollateralModal(true)}
-                className="bg-[#1e293b]/50 border border-[#f59e0b]/20 rounded-xl p-6 cursor-pointer hover:border-[#f59e0b]/40 transition-colors"
+                className="bg-[#1e293b]/50 border border-[#3eddfd]/10 rounded-xl p-6 cursor-pointer hover:border-[#3eddfd]/20 transition-colors"
               >
                 <div className="text-[#94a3b8] text-sm mb-2">Your Collateral</div>
                 <div className="text-[#10b981] text-2xl font-bold">{formatAmount(userCollateral)}</div>
@@ -218,14 +218,14 @@ export default function BorrowUSDT() {
               </div>
 
               {/* APY */}
-              <div className="bg-[#1e293b]/50 border border-[#f59e0b]/20 rounded-xl p-6">
+              <div className="bg-[#1e293b]/50 border border-[#3eddfd]/10 rounded-xl p-6">
                 <div className="text-[#94a3b8] text-sm mb-2">Borrow APY</div>
-                <div className="text-[#f59e0b] text-2xl font-bold">{formatAPY(borrowAPY)}</div>
+                <div className="text-[#3eddfd] text-2xl font-bold">{formatAPY(borrowAPY)}</div>
                 <div className="text-[#94a3b8] text-sm">Annual rate</div>
               </div>
 
               {/* Health Factor */}
-              <div className="bg-[#1e293b]/50 border border-[#f59e0b]/20 rounded-xl p-6">
+              <div className="bg-[#1e293b]/50 border border-[#3eddfd]/10 rounded-xl p-6">
                 <div className="text-[#94a3b8] text-sm mb-2">Health Factor</div>
                 <div className={`text-2xl font-bold ${hfColor}`}>{formatHealthFactor(healthFactor)}</div>
                 <div className="text-[#94a3b8] text-sm">Collateral safety</div>
@@ -237,7 +237,7 @@ export default function BorrowUSDT() {
         {/* Section 3: Two Columns - Chart and Action Panel */}
         <div className="grid grid-cols-2 gap-6">
           {/* Left: Chart Area */}
-          <div className="bg-[#1e293b]/50 border border-[#f59e0b]/10 rounded-xl p-6">
+          <div className="bg-[#1e293b]/50 border border-[#3eddfd]/10 rounded-xl p-6">
             <div className="text-[#f8fafc] text-lg font-semibold mb-4">Borrow Rate History</div>
             {/* Chart placeholder */}
             <div className="h-64 bg-[#0f172a]/50 rounded-lg flex items-center justify-center">
@@ -261,7 +261,7 @@ export default function BorrowUSDT() {
           </div>
 
           {/* Right: Action Panel */}
-          <div className="bg-[#1e293b]/50 border border-[#f59e0b]/10 rounded-xl p-6">
+          <div className="bg-[#1e293b]/50 border border-[#3eddfd]/10 rounded-xl p-6">
             <div className="text-[#f8fafc] text-lg font-semibold mb-4">Borrow</div>
 
             {isLoading ? (
@@ -285,7 +285,7 @@ export default function BorrowUSDT() {
                         <div className="text-[#10b981] font-semibold">{formatAmount(userCollateral)} cETH</div>
                       </div>
                     </div>
-                    <div className="text-[#f59e0b] text-sm">Manage →</div>
+                    <div className="text-[#3eddfd] text-sm">Manage →</div>
                   </div>
                 </div>
 
@@ -297,7 +297,7 @@ export default function BorrowUSDT() {
                     value={borrowAmount}
                     onChange={(e) => setBorrowAmount(e.target.value)}
                     placeholder="0.00"
-                    className="w-full bg-[#0f172a] border border-[#f59e0b]/20 rounded-lg px-4 py-3 text-[#f8fafc] placeholder-[#94a3b8] focus:outline-none focus:border-[#f59e0b]/50"
+                    className="w-full bg-[#0f172a] border border-[#3eddfd]/20 rounded-lg px-4 py-3 text-[#f8fafc] placeholder-[#94a3b8] focus:outline-none focus:border-[#3eddfd]/50"
                   />
                   <div className="text-[#94a3b8] text-sm mt-2">
                     Max: <span className="text-[#f8fafc]">{formatAmount(maxBorrow)} USDT</span>
@@ -308,7 +308,7 @@ export default function BorrowUSDT() {
                 <button
                   onClick={handleBorrow}
                   disabled={borrowLoading || !borrowAmount}
-                  className="w-full bg-[#f59e0b] hover:bg-[#f59e0b]/90 text-[#0f172a] font-semibold py-3 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full bg-[#3eddfd] hover:bg-[#3eddfd]/90 text-[#0f172a] font-semibold py-3 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {borrowLoading ? 'Borrowing...' : 'Borrow USDT'}
                 </button>
@@ -317,9 +317,9 @@ export default function BorrowUSDT() {
 
             {/* Divider */}
             <div className="flex items-center gap-4 my-6">
-              <div className="flex-1 h-px bg-[#f59e0b]/10"></div>
+              <div className="flex-1 h-px bg-[#3eddfd]/10"></div>
               <span className="text-[#94a3b8] text-sm">or</span>
-              <div className="flex-1 h-px bg-[#f59e0b]/10"></div>
+              <div className="flex-1 h-px bg-[#3eddfd]/10"></div>
             </div>
 
             {isLoading ? (
@@ -334,7 +334,7 @@ export default function BorrowUSDT() {
                     value={repayAmount}
                     onChange={(e) => setRepayAmount(e.target.value)}
                     placeholder="0.00"
-                    className="w-full bg-[#0f172a] border border-[#f59e0b]/20 rounded-lg px-4 py-3 text-[#f8fafc] placeholder-[#94a3b8] focus:outline-none focus:border-[#f59e0b]/50"
+                    className="w-full bg-[#0f172a] border border-[#3eddfd]/20 rounded-lg px-4 py-3 text-[#f8fafc] placeholder-[#94a3b8] focus:outline-none focus:border-[#3eddfd]/50"
                   />
                   <div className="text-[#94a3b8] text-sm mt-2 flex">
                     <div>
@@ -350,7 +350,7 @@ export default function BorrowUSDT() {
                 <button
                   onClick={handleRepay}
                   disabled={repayLoading || !repayAmount}
-                  className="w-full bg-[#f59e0b]/10 hover:bg-[#f59e0b]/20 text-[#f59e0b] font-semibold py-3 rounded-lg border border-[#f59e0b]/20 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full bg-[#3eddfd]/10 hover:bg-[#3eddfd]/20 text-[#3eddfd] font-semibold py-3 rounded-lg border border-[#3eddfd]/20 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {repayLoading ? 'Repaying...' : 'Repay'}
                 </button>

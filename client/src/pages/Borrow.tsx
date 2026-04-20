@@ -35,11 +35,11 @@ export default function Borrow() {
 
         {/* Market Table */}
         <div 
-          className="bg-[#1e293b]/50 border border-[#f59e0b]/10 rounded-lg overflow-hidden cursor-pointer hover:bg-[#1e293b]/70 transition-all"
+          className="bg-[#1e293b]/50 border border-[#3eddfd]/10 rounded-lg overflow-hidden cursor-pointer hover:bg-[#1e293b]/70 transition-all"
           onClick={handleRowClick}
         >
           {/* Header */}
-          <div className="px-6 py-4 border-b border-[#f59e0b]/10">
+          <div className="px-6 py-4 border-b border-[#3eddfd]/10">
             <h3 className="text-xl font-bold text-[#f8fafc]">Available Markets</h3>
           </div>
 
@@ -65,7 +65,7 @@ export default function Borrow() {
                   </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[#f59e0b]/10">
+              <tbody className="divide-y divide-[#3eddfd]/10">
                 {loading ? (
                   <tr>
                     <td colSpan={5} className="px-6 py-12 text-center text-[#94a3b8]">
@@ -73,7 +73,7 @@ export default function Borrow() {
                     </td>
                   </tr>
                 ) : (
-                  <tr className="border-b border-[#f59e0b]/10 hover:bg-[#f59e0b]/5 transition-colors">
+                  <tr className="border-b border-[#3eddfd]/10 hover:bg-[#3eddfd]/5 transition-colors">
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
                         <img src="https://s2.coinmarketcap.com/static/img/coins/64x64/825.png" alt="USDT" className="w-10 h-10 rounded-full" />
@@ -84,7 +84,7 @@ export default function Borrow() {
                       </div>
                     </td>
                     <td className="px-6 py-4">
-                      <div className="text-[#f59e0b] font-semibold">{formatAPY(borrowAPY)}</div>
+                      <div className="text-[#3eddfd] font-semibold">{formatAPY(borrowAPY)}</div>
                     </td>
                     <td className="px-6 py-4">
                       <div className="text-[#f8fafc]">{utilization.toFixed(1)}%</div>
@@ -105,23 +105,23 @@ export default function Borrow() {
         </div>
 
         {/* Info Card */}
-        <div className="mt-8 p-6 bg-[#1e293b]/30 border border-[#f59e0b]/10 rounded-lg">
+        <div className="mt-8 p-6 bg-[#1e293b]/30 border border-[#3eddfd]/10 rounded-lg">
           <h3 className="text-lg font-semibold text-[#f8fafc] mb-4">How borrowing works</h3>
           <ul className="space-y-2 text-[#94a3b8]">
             <li className="flex items-start gap-2">
-              <span className="text-[#f59e0b]">1.</span>
+              <span className="text-[#3eddfd]">1.</span>
               <span>Deposit ETH as collateral - your funds remain in your wallet but are used as security</span>
             </li>
             <li className="flex items-start gap-2">
-              <span className="text-[#f59e0b]">2.</span>
+              <span className="text-[#3eddfd]">2.</span>
               <span>Borrow USDT up to {lltvPercent}% of your collateral value (LTV)</span>
             </li>
             <li className="flex items-start gap-2">
-              <span className="text-[#f59e0b]">3.</span>
+              <span className="text-[#3eddfd]">3.</span>
               <span>Pay interest on your borrowed amount - repay anytime with no penalties</span>
             </li>
             <li className="flex items-start gap-2">
-              <span className="text-[#f59e0b]">4.</span>
+              <span className="text-[#3eddfd]">4.</span>
               <span>Your position is monitored - if collateral drops below threshold, you may be liquidated</span>
             </li>
           </ul>
