@@ -53,6 +53,29 @@ const CLAIM_TOKENS: Record<string, { icon: string; name: string; cTokenAddress: 
   },
 };
 
+// Skeleton loading row component
+function TableRowSkeleton() {
+  return (
+    <tr className="border-b border-[#3eddfd]/10 last:border-b-0">
+      <td className="py-4 px-4">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-full bg-[#0f172a] animate-pulse"></div>
+          <div className="space-y-1">
+            <div className="h-4 w-16 bg-[#0f172a] rounded animate-pulse"></div>
+            <div className="h-3 w-20 bg-[#0f172a] rounded animate-pulse"></div>
+          </div>
+        </div>
+      </td>
+      <td className="py-4 px-4 text-right">
+        <div className="h-6 w-24 ml-auto bg-[#0f172a] rounded animate-pulse"></div>
+      </td>
+      <td className="py-4 px-4 text-right">
+        <div className="h-8 w-16 ml-auto bg-[#0f172a] rounded animate-pulse"></div>
+      </td>
+    </tr>
+  );
+}
+
 export default function ConvertSection() {
   const { address } = useAccount();
   const publicClient = usePublicClient();
@@ -116,7 +139,7 @@ export default function ConvertSection() {
     if (!address || !publicClient || !cofheClient || !connected) return 0n;
 
     try {
- 
+  
       // confidentialBalanceOf returns euint64 (as bytes32 ctHash)
       const ctHash = await publicClient.readContract({
         address: cTokenAddress,
@@ -264,35 +287,42 @@ export default function ConvertSection() {
                 </tr>
               </thead>
               <tbody>
-                {TOKENS.map((token) => {
-                  const erc20Balance = erc20Balances[token.symbol] || 0n;
-                  return (
-                    <tr key={token.symbol} className="border-b border-[#3eddfd]/10 last:border-b-0 hover:bg-[#1e293b]/50 transition-colors">
-                      <td className="py-4 px-4">
-                        <div className="flex items-center gap-3">
-                          <img src={token.icon} alt={token.symbol} className="w-10 h-10 rounded-full" />
-                          <div>
-                            <div className="font-medium text-[#f8fafc]">{token.symbol}</div>
-                            <div className="text-xs text-[#94a3b8]">{token.name}</div>
+                {balancesLoading ? (
+                  <>
+                    <TableRowSkeleton />
+                    <TableRowSkeleton />
+                  </>
+                ) : (
+                  TOKENS.map((token) => {
+                    const erc20Balance = erc20Balances[token.symbol] || 0n;
+                    return (
+                      <tr key={token.symbol} className="border-b border-[#3eddfd]/10 last:border-b-0 hover:bg-[#1e293b]/50 transition-colors">
+                        <td className="py-4 px-4">
+                          <div className="flex items-center gap-3">
+                            <img src={token.icon} alt={token.symbol} className="w-10 h-10 rounded-full" />
+                            <div>
+                              <div className="font-medium text-[#f8fafc]">{token.symbol}</div>
+                              <div className="text-xs text-[#94a3b8]">{token.name}</div>
+                            </div>
                           </div>
-                        </div>
-                      </td>
-                      <td className="text-right py-4 px-4">
-                        <span className="text-lg font-semibold text-[#f8fafc]">
-                          {balancesLoading ? '...' : formatBalance(erc20Balance, token.decimals)}
-                        </span>
-                      </td>
-                      <td className="text-right py-4 px-4">
-                        <button
-                          onClick={() => openWrapModal(token)}
-                          className="px-4 py-2 bg-[#3eddfd] text-[#0f172a] font-semibold rounded-lg text-sm hover:bg-[#3eddfd]/80 transition-colors whitespace-nowrap"
-                        >
-                          Wrap
-                        </button>
-                      </td>
-                    </tr>
-                  );
-                })}
+                        </td>
+                        <td className="text-right py-4 px-4">
+                          <span className="text-lg font-semibold text-[#f8fafc]">
+                            {formatBalance(erc20Balance, token.decimals)}
+                          </span>
+                        </td>
+                        <td className="text-right py-4 px-4">
+                          <button
+                            onClick={() => openWrapModal(token)}
+                            className="px-4 py-2 bg-[#3eddfd] text-[#0f172a] font-semibold rounded-lg text-sm hover:bg-[#3eddfd]/80 transition-colors whitespace-nowrap"
+                          >
+                            Wrap
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  })
+                )}
               </tbody>
             </table>
           </div>
@@ -316,35 +346,42 @@ export default function ConvertSection() {
                   </tr>
                 </thead>
                 <tbody>
-                  {TOKENS.map((token) => {
-                    const confidentialBalance = confidentialBalances[token.symbol] || 0n;
-                    return (
-                      <tr key={token.symbol} className="border-b border-[#3eddfd]/10 last:border-b-0 hover:bg-[#1e293b]/50 transition-colors">
-                        <td className="py-4 px-4">
-                          <div className="flex items-center gap-3">
-                            <img src={token.icon} alt={token.symbol} className="w-10 h-10 rounded-full" />
-                            <div>
-                              <div className="font-medium text-[#f8fafc]">{token.cSymbol}</div>
-                              <div className="text-xs text-[#94a3b8]">Confidential {token.symbol}</div>
+                  {balancesLoading ? (
+                    <>
+                      <TableRowSkeleton />
+                      <TableRowSkeleton />
+                    </>
+                  ) : (
+                    TOKENS.map((token) => {
+                      const confidentialBalance = confidentialBalances[token.symbol] || 0n;
+                      return (
+                        <tr key={token.symbol} className="border-b border-[#3eddfd]/10 last:border-b-0 hover:bg-[#1e293b]/50 transition-colors">
+                          <td className="py-4 px-4">
+                            <div className="flex items-center gap-3">
+                              <img src={token.icon} alt={token.symbol} className="w-10 h-10 rounded-full" />
+                              <div>
+                                <div className="font-medium text-[#f8fafc]">{token.cSymbol}</div>
+                                <div className="text-xs text-[#94a3b8]">Confidential {token.symbol}</div>
+                              </div>
                             </div>
-                          </div>
-                        </td>
-                        <td className="text-right py-4 px-4">
-                          <span className="text-lg font-semibold text-[#f8fafc]">
-                            {balancesLoading ? '...' : formatBalance(confidentialBalance, token.decimals)}
-                          </span>
-                        </td>
-                        <td className="text-right py-4 px-4">
-                          <button
-                            onClick={() => openUnwrapModal(token)}
-                            className="px-4 py-2 bg-[#3eddfd] text-[#0f172a] font-semibold rounded-lg text-sm hover:bg-[#3eddfd]/80 transition-colors whitespace-nowrap"
-                          >
-                            Unwrap
-                          </button>
-                        </td>
-                      </tr>
-                    );
-                  })}
+                          </td>
+                          <td className="text-right py-4 px-4">
+                            <span className="text-lg font-semibold text-[#f8fafc]">
+                              {formatBalance(confidentialBalance, token.decimals)}
+                            </span>
+                          </td>
+                          <td className="text-right py-4 px-4">
+                            <button
+                              onClick={() => openUnwrapModal(token)}
+                              className="px-4 py-2 bg-[#3eddfd] text-[#0f172a] font-semibold rounded-lg text-sm hover:bg-[#3eddfd]/80 transition-colors whitespace-nowrap"
+                            >
+                              Unwrap
+                            </button>
+                          </td>
+                        </tr>
+                      );
+                    })
+                  )}
                 </tbody>
               </table>
             </div>
