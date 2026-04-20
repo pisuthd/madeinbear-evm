@@ -2,7 +2,7 @@ import { useMarketInfo } from '../hooks/useMarketInfo';
 import { useNavigate } from 'react-router-dom';
 
 export default function Borrow() {
-  const { marketData, borrowAPY, utilization, lltvPercent, loading } = useMarketInfo();
+  const { marketData, borrowAPY } = useMarketInfo();
   const navigate = useNavigate();
 
   const formatAmount = (amount: bigint | undefined, decimals: number = 6) => {
@@ -26,103 +26,71 @@ export default function Borrow() {
     <div className="min-h-screen bg-[#0f172a] pt-24 px-4">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold text-[#f8fafc] mb-2">Borrow</h1>
-          <p className="text-lg text-[#94a3b8]">
-            Borrow USDT against your ETH collateral. Repay anytime with no penalties.
+        <div className="mb-12 text-center">
+          <h1 className="text-3xl md:text-4xl lg:text-[48px] font-bold mb-4 text-[#f8fafc] tracking-tight">Borrow</h1>
+          <div className="w-24 h-1 bg-gradient-to-r from-[#3eddfd] to-transparent mx-auto mt-4" />
+          <p className="text-base mt-[24px] md:text-xl text-[#cbd5e1] max-w-xl mx-auto">
+           Borrow against your assets and access instant credit on-chain with confidential collateral
           </p>
         </div>
 
         {/* Market Table */}
         <div 
-          className="bg-[#1e293b]/50 border border-[#3eddfd]/10 rounded-lg overflow-hidden cursor-pointer hover:bg-[#1e293b]/70 transition-all"
+          className="bg-[#1e293b]/50 backdrop-blur-lg border border-[#3eddfd]/10 rounded-xl overflow-hidden cursor-pointer hover:bg-[#1e293b]/70 hover:border-[#3eddfd]/30 transition-all"
           onClick={handleRowClick}
         >
-          {/* Header */}
-          <div className="px-6 py-4 border-b border-[#3eddfd]/10">
-            <h3 className="text-xl font-bold text-[#f8fafc]">Available Markets</h3>
+          {/* Table Header */}
+          <div className="grid grid-cols-5 gap-4 px-6 py-4 bg-[#0f172a]/30 border-b border-[#3eddfd]/10">
+            <div className="text-sm font-medium text-[#94a3b8]">Borrowable Asset</div>
+            <div className="text-sm font-medium text-[#94a3b8] text-right">Borrow APR</div>
+            <div className="text-sm font-medium text-[#94a3b8] text-right">Collateral</div>
+            <div className="text-sm font-medium text-[#94a3b8] text-right">Total Borrowed</div>
+            <div className="text-sm font-medium text-[#94a3b8] text-right">Available</div>
           </div>
 
-          {/* Table */}
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-[#0f172a]/50">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-semibold text-[#94a3b8] uppercase tracking-wider">
-                    Asset
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-semibold text-[#94a3b8] uppercase tracking-wider">
-                    Borrow APY
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-semibold text-[#94a3b8] uppercase tracking-wider">
-                    Utilization
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-semibold text-[#94a3b8] uppercase tracking-wider">
-                    Total Borrowed
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-semibold text-[#94a3b8] uppercase tracking-wider">
-                    LTV
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-[#3eddfd]/10">
-                {loading ? (
-                  <tr>
-                    <td colSpan={5} className="px-6 py-12 text-center text-[#94a3b8]">
-                      Loading...
-                    </td>
-                  </tr>
-                ) : (
-                  <tr className="border-b border-[#3eddfd]/10 hover:bg-[#3eddfd]/5 transition-colors">
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-3">
-                        <img src="https://s2.coinmarketcap.com/static/img/coins/64x64/825.png" alt="USDT" className="w-10 h-10 rounded-full" />
-                        <div>
-                          <div className="font-semibold text-[#f8fafc]">USDT Borrow</div>
-                          <div className="text-xs text-[#94a3b8]">Borrow USDT with ETH collateral</div>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="text-[#3eddfd] font-semibold">{formatAPY(borrowAPY)}</div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="text-[#f8fafc]">{utilization.toFixed(1)}%</div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="text-[#f8fafc]">
-                        {marketData ? formatAmount(marketData.totalBorrowAssets) : '0.00'} cUSDT
-                      </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="text-[#f8fafc]">{lltvPercent}%</div>
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
+          {/* Table Row */}
+          <div className="grid grid-cols-5 gap-4 px-6 py-6">
+            <div className="flex items-center gap-3">
+              <img src="https://s2.coinmarketcap.com/static/img/coins/64x64/825.png" alt="USDT" className="w-10 h-10 rounded-full" />
+              <div className="font-semibold text-[#f8fafc]">cUSDT</div>
+            </div>
+            <div className="text-right flex items-center justify-end">
+              <div className="text-[#3eddfd] font-semibold text-lg">{formatAPY(borrowAPY)}</div>
+            </div>
+            <div className="flex items-center justify-end gap-2">
+              <img src="https://s2.coinmarketcap.com/static/img/coins/64x64/1027.png" alt="ETH" className="w-6 h-6 rounded-full" />
+              <div className="text-[#f8fafc]">cETH</div>
+            </div>
+            <div className="text-right flex items-center justify-end">
+              <div className="text-[#f8fafc] text-lg">
+                {marketData ? formatAmount(marketData.totalBorrowAssets) : '0.00'} cUSDT
+              </div>
+            </div>
+            <div className="text-right flex items-center justify-end">
+              <div className="text-[#f8fafc] text-lg">
+                {marketData && marketData.totalSupplyAssets > 0n
+                  ? formatAmount(marketData.totalSupplyAssets - marketData.totalBorrowAssets)
+                  : '0.00'} cUSDT
+              </div>
+            </div>
           </div>
         </div>
 
         {/* Info Card */}
         <div className="mt-8 p-6 bg-[#1e293b]/30 border border-[#3eddfd]/10 rounded-lg">
           <h3 className="text-lg font-semibold text-[#f8fafc] mb-4">How borrowing works</h3>
-          <ul className="space-y-2 text-[#94a3b8]">
+          <ul className="space-y-3 text-[#94a3b8]">
             <li className="flex items-start gap-2">
               <span className="text-[#3eddfd]">1.</span>
-              <span>Deposit ETH as collateral - your funds remain in your wallet but are used as security</span>
+              <span>Use cETH as collateral to borrow USDT - borrow up to 75% of your collateral value</span>
             </li>
             <li className="flex items-start gap-2">
               <span className="text-[#3eddfd]">2.</span>
-              <span>Borrow USDT up to {lltvPercent}% of your collateral value (LTV)</span>
+              <span>Your collateral balance and positions stay private on-chain with Fhenix FHE</span>
             </li>
             <li className="flex items-start gap-2">
               <span className="text-[#3eddfd]">3.</span>
-              <span>Pay interest on your borrowed amount - repay anytime with no penalties</span>
-            </li>
-            <li className="flex items-start gap-2">
-              <span className="text-[#3eddfd]">4.</span>
-              <span>Your position is monitored - if collateral drops below threshold, you may be liquidated</span>
+              <span>Repay your loan anytime to unlock and unwrap your collateral</span>
             </li>
           </ul>
         </div>
