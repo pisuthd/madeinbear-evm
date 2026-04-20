@@ -25,12 +25,12 @@ function Hero() {
             </p>
 
             {/* Main Headline */}
-            <h1 className="text-3xl md:text-4xl lg:text-[56px] font-bold mb-4 leading-tight text-[#f8fafc] tracking-tight">
-              A Privacy Neobank for Digital Assets 
+            <h1 className="text-3xl md:text-4xl lg:text-[54px] font-bold mb-4 leading-tight text-[#f8fafc] tracking-tight">
+              A Privacy-First Neobank for Ethereum
             </h1> 
             {/* Description */}
-            <p className="text-base md:text-xl text-[#cbd5e1] mb-8 max-w-xl leading-relaxed">
-              Confidential banking for digital assets powered by Fhenix FHE. Supply, borrow, and invest with ERC-7984 tokens and selective disclosure for compliant finance.
+            <p className="text-base md:text-xl text-[#cbd5e1] mb-8 max-w-2xl leading-relaxed">
+              On-chain banking for digital assets powered by Fhenix. Supply, borrow, and invest using ERC-7984 confidential tokens with selective disclosure for compliant finance
             </p>
             {/* CTA Buttons */}
             <div className="flex flex-col sm:flex-row gap-4 mb-6">
@@ -38,7 +38,7 @@ function Hero() {
                 to="/earn"
                 className="px-8 py-4 bg-[#3eddfd] text-[#0f172a] font-semibold rounded-lg transition-all hover:bg-[#2dd4d4] hover:shadow-[0_0_30px_rgba(62,223,223,0.4)] hover:-translate-y-0.5 text-center"
               >
-                Supply Assets
+                Supply & Earn
               </Link>
               <Link
                 to="/borrow"

@@ -16,8 +16,8 @@ function Footer() {
             >
               MadeInBear
             </Link>
-            <p className="text-[#94a3b8] text-sm leading-relaxed">
-              A Privacy Neobank for Digital Assets
+            <p className="text-[#94a3b8] text-sm max-w-sm leading-relaxed">
+              A Privacy Neobank for Ethereum using Fhenix Fully Homomorphic Encryption
             </p>
           </div>
 
@@ -27,27 +27,37 @@ function Footer() {
             <ul className="space-y-2">
               <li>
                 <Link
-                  to="/dashboard"
+                  to="/earn"
                   className="text-[#94a3b8] hover:text-[#3eddfd] transition-colors text-sm"
                 >
-                  Open Account
+                  Supply Assets
                 </Link>
               </li>
               <li>
                 <Link
-                  to="/credentials"
+                  to="/borrow"
                   className="text-[#94a3b8] hover:text-[#3eddfd] transition-colors text-sm"
                 >
-                  Credentials
+                  Take a Loan
                 </Link>
               </li>
               <li>
                 <Link
-                  to="/ask-ai"
+                  to="/portfolio"
                   className="text-[#94a3b8] hover:text-[#3eddfd] transition-colors text-sm"
                 >
-                  Ask AI
+                  View Portfolio
                 </Link>
+              </li>
+              <li>
+                <a
+                  href="https://github.com/pisuthd/madeinbear-evm"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-[#94a3b8] hover:text-[#3eddfd] transition-colors text-sm"
+                > 
+                  GitHub
+                </a>
               </li>
             </ul>
           </div>

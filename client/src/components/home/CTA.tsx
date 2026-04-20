@@ -7,17 +7,22 @@ function CTA() {
 
                 {/* Headline */}
                 <h2 className="text-3xl md:text-4xl lg:text-4xl font-bold mb-6 text-[#f8fafc] tracking-tight">
-                    Ready to Get Started?
+                    Start Earning Confidentially
                 </h2>
+
+                {/* Subtitle */}
+                <p className="text-lg text-[#94a3b8] mb-8 max-w-xl mx-auto">
+                    Your private lending journey begins here
+                </p>
 
                 {/* Subtle decorative line */}
                 <div className="w-16 h-1 bg-[#3eddfd] mx-auto mb-8" />
 
 
                 {/* CTA Button */}
-                <Link to="/dashboard">
+                <Link to="/portfolio">
                     <button className="px-8 py-4 bg-[#3eddfd] hover:bg-[#2dd4d4] text-[#0f172a] font-bold text-lg rounded-xl transition-all duration-300 shadow-[0_0_20px_rgba(62,223,223,0.3)] hover:shadow-[0_0_30px_rgba(62,223,223,0.5)]">
-                        Go to Dashboard
+                        Go to Account
                     </button>
                 </Link>
             </div>
