@@ -170,21 +170,22 @@ export function useUserCollateralPosition() {
 
       // Decrypt collateral (third element) - stored as uint128 but displayed as 6 decimals
       const permit = await cofheClient.permits.getOrCreateSelfPermit();
-      const [decryptedCollateral, decryptedBorrowShares] = await Promise.all([
-        cofheClient
-          .decryptForView(positionResult[2], FheTypes.Uint128)
-          .withPermit(permit)
-          .execute(),
-        cofheClient
-          .decryptForView(positionResult[1], FheTypes.Uint128)
-          .withPermit(permit)
-          .execute(),
-      ]);
+     
+      const decryptedCollateral = await cofheClient
+        .decryptForView(positionResult[2], FheTypes.Uint128)
+        .withPermit(permit)
+        .execute()
 
       console.log('Decrypted collateral:', decryptedCollateral);
+
+      const decryptedBorrowShares = await cofheClient
+        .decryptForView(positionResult[1], FheTypes.Uint128)
+        .withPermit(permit)
+        .execute()
+
       console.log('Decrypted borrowShares:', decryptedBorrowShares);
 
-      setCollateral(sharesToAssets(decryptedCollateral, 6));
+      setCollateral(decryptedCollateral);
       setBorrowAssets(sharesToAssets(decryptedBorrowShares, 6));
     } catch (err) {
       console.error('Failed to fetch position:', err);

@@ -108,7 +108,7 @@ export default function SupplyUSDT() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0f172a] pt-24 px-4">
+    <div className="min-h-screen bg-[#0f172a] py-24 px-4">
       <div className="max-w-6xl mx-auto">
         {/* Section 1: Header with Back Link and Title */}
         <div className="mb-6">
@@ -229,21 +229,13 @@ export default function SupplyUSDT() {
                 {/* Amount Input */}
                 <div className="mb-4">
                   <label className="text-[#94a3b8] text-sm mb-2 block">Amount</label>
-                  <div className="relative">
-                    <input
-                      type="number"
-                      value={supplyAmount}
-                      onChange={(e) => setSupplyAmount(e.target.value)}
-                      placeholder="0.00"
-                      className="w-full bg-[#0f172a] border border-[#3eddfd]/20 rounded-lg px-4 py-3 text-[#f8fafc] placeholder-[#94a3b8] focus:outline-none focus:border-[#3eddfd]/50"
-                    />
-                    <button 
-                      onClick={() => setSupplyAmount((Number(cUSDTBalance) / 1e6).toFixed(2))}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-[#3eddfd] text-sm hover:underline"
-                    >
-                      MAX
-                    </button>
-                  </div>
+                  <input
+                    type="number"
+                    value={supplyAmount}
+                    onChange={(e) => setSupplyAmount(e.target.value)}
+                    placeholder="0.00"
+                    className="w-full bg-[#0f172a] border border-[#3eddfd]/20 rounded-lg px-4 py-3 text-[#f8fafc] placeholder-[#94a3b8] focus:outline-none focus:border-[#3eddfd]/50"
+                  />
                   <div className="text-[#94a3b8] text-sm mt-2">
                     Balance: <span className="text-[#f8fafc]">{formatAmount(cUSDTBalance)} cUSDT</span>
                   </div>
@@ -274,21 +266,13 @@ export default function SupplyUSDT() {
                 {/* Withdraw Section */}
                 <div className="mb-4">
                   <label className="text-[#94a3b8] text-sm mb-2 block">Withdraw Amount</label>
-                  <div className="relative">
-                    <input
-                      type="number"
-                      value={withdrawAmount}
-                      onChange={(e) => setWithdrawAmount(e.target.value)}
-                      placeholder="0.00"
-                      className="w-full bg-[#0f172a] border border-[#3eddfd]/20 rounded-lg px-4 py-3 text-[#f8fafc] placeholder-[#94a3b8] focus:outline-none focus:border-[#3eddfd]/50"
-                    />
-                    <button 
-                      onClick={() => setWithdrawAmount((Number(userSupplied) / 1e6).toFixed(2))}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-[#3eddfd] text-sm hover:underline"
-                    >
-                      MAX
-                    </button>
-                  </div>
+                  <input
+                    type="number"
+                    value={withdrawAmount}
+                    onChange={(e) => setWithdrawAmount(e.target.value)}
+                    placeholder="0.00"
+                    className="w-full bg-[#0f172a] border border-[#3eddfd]/20 rounded-lg px-4 py-3 text-[#f8fafc] placeholder-[#94a3b8] focus:outline-none focus:border-[#3eddfd]/50"
+                  />
                   <div className="text-[#94a3b8] text-sm mt-2">
                     Supplied: <span className="text-[#10b981]">{formatAmount(userSupplied)} cUSDT</span>
                   </div>
