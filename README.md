@@ -11,7 +11,6 @@ Each market operates with configurable access and compliance layers, enabling us
 - **Confidential by Default**: All balances, positions, and financial activity are encrypted using Fhenix FHE
 - **ERC-7984 Confidential Tokens**: Standard assets are wrapped into confidential tokens for private on-chain usage
 - **Multi-Market Architecture**: Support for multiple financial products, from lending markets to RWA-backed strategies
-- **Selective Disclosure**: Users can reveal specific data points for compliance, auditing, or counterparties
 - **Composable Compliance**: Markets can enforce KYC, access control, and regulatory requirements at the protocol level
 - **On-Chain Verifiability**: Protocol logic remains transparent while sensitive user data stays encrypted
 
@@ -32,7 +31,7 @@ Current DeFi protocols expose all user positions publicly:
 MadeInBear introduces a new model for on-chain finance by combining confidential computing with a market-based banking architecture:
 
 - **Confidential Financial Positions**  
-  All balances, deposits, loans, and collateral are stored and processed as encrypted values using :contentReference[oaicite:0]{index=0}, ensuring user financial data remains private by default
+  All balances, deposits, loans, and collateral are stored and processed as encrypted values using Fhenix FHE, ensuring user financial data remains private by default
 
 - **ERC-7984 Confidential Tokens**  
   Standard ERC20 assets are wrapped into confidential tokens, enabling private transfers, deposits, and interactions across all markets
@@ -46,18 +45,15 @@ MadeInBear introduces a new model for on-chain finance by combining confidential
 - **Permissioned and Open Access**  
   Markets can be fully permissionless or gated with requirements such as KYC credentials, allowing both retail and institutional participation within the same system
 
-- **Selective Disclosure for Compliance**  
-  Users can reveal specific financial data when required for KYC, AML, auditing, or counterparties, without exposing their entire portfolio
-
 - **Morpho-Based Lending Engine**: Built on a fork of Morpho Blue, leveraging isolated markets and efficient capital matching while extending it with confidential balances and account abstraction
 
 ## Technical Architecture
 
 ### Core Contracts
 
-#### CMorpho — Confidential Morpho-Blue Lending
+#### CMorpho — Confidential Morpho Blue Lending
 
-Built on Morpho-Blue, CMorpho is an FHE-encrypted isolated lending market where all user positions are encrypted on-chain.
+Built on Morpho Blue isolated market architecture, CMorpho is an FHE-encrypted lending market where all user positions are encrypted on-chain using Fhenix FHE.
 
 **Architecture:**
 ```
@@ -127,31 +123,25 @@ After every position update, permissions are granted to:
 
 ## Key Features
 
-### 🔒 Complete Privacy
+### Complete Privacy
 
 - All supply, borrow, and collateral positions encrypted
 - Transaction amounts hidden from public view
 - No information leakage to observers
 
-### ✅ Verifiable Operations
+### Verifiable Operations
 
 - On-chain proofs for all operations
 - Protocol state remains auditable
 - Market-level data (TVL, utilization) visible
 
-### 🔐 Selective Disclosure
+### Isolated Markets
 
-- Permissioned decryption system
-- Grant access to specific addresses
-- Optional reveal for compliance
-
-### 🏦 Isolated Markets
-
-- Risk-isolated design (Morpho-Blue)
+- Risk-isolated design (Morpho Blue)
 - No contagion between markets
 - Deeper liquidity per market
 
-### 💰 ERC-7984 Confidential Tokens
+### ERC-7984 Confidential Tokens
 
 - Wrap ERC20 → Confidential Token
 - Transfer encrypted values
@@ -175,31 +165,26 @@ After every position update, permissions are granted to:
 4. Borrow USDT against your position
 5. Repay to unlock collateral
 
-## Known Trade-offs
+## Next Wave
 
-| Item | Status | Notes |
-|------|--------|-------|
-| Health check on borrow | ⚠️ Skipped | Cannot `require()` on encrypted `ebool`. Enforced via liquidation. |
-| Liquidation | 🔲 Not implemented | Needs encrypted health check → liquidator bot pattern |
-| Flash loans | 🔲 Not implemented | `flashLoan()` not yet implemented |
-| Fee recipient | ❌ Removed | All interest accrues to suppliers (no fee) |
-| FHE division rounding | ⚠️ Truncates | FHE div rounds down (less conservative) |
+- Health check enforcement via liquidation
+- Flash loans for efficient capital utilization
+- RWA-backed yield markets
 
 ## Technology Stack
 
 ### Blockchain
-- **Network**: Fhenix Network (FHE-enabled Layer 2)
-- **EVM Compatible**: Full Solidity support
+- **Network**: Ethereum Sepolia
+- **Encryption Layer**: Fhenix FHE for confidential computation
 
 ### Smart Contracts
-- **Language**: Solidity ^0.8.25, EVM Cancun
+- **Language**: Solidity ^0.8.25
 - **FHE Library**: @fhenixprotocol/cofhe-contracts
-- **Architecture**: Morpho-Blue with FHE encryption
+- **Core Architecture**: Morpho Blue isolated market rewritten with FHE
 
 ### Frontend
 - **Framework**: React 18 + TypeScript
-- **Build Tool**: Vite
-- **Web3**: Wagmi + Viem
+- **Web3 SDK**: Wagmi + Viem
 - **FHE SDK**: @cofhe/sdk
 - **Styling**: Tailwind CSS
 
@@ -214,7 +199,7 @@ cd madeinbear
 npm install
 
 # Compile contracts
-npx hardhat compile
+npm run compile
 
 # Run tests
 npm test
@@ -225,46 +210,6 @@ npm install
 npm run dev
 ```
 
-## Live Demo
-
-1. Connect wallet to Sepolia testnet
-2. Get test tokens from faucet
-3. Wrap tokens to confidential format
-4. Supply or borrow on isolated markets
-5. View your encrypted positions
-
-## Security
-
-### Current Status
-- ✅ Comprehensive test suite
-- ✅ Fhenix CoFHE integration
-- ✅ Morpho-Blue battle-tested architecture
-
-### Production Checklist
-- [ ] Independent security audit
-- [ ] Bug bounty program
-- [ ] Multi-sig ownership
-
-## Contributing
-
-Contributions welcome! Please open an issue to discuss major changes.
-
 ## License
 
 MIT License. See [LICENSE](LICENSE).
-
-## Acknowledgments
-
-- **Fhenix Protocol**: FHE infrastructure and SDK
-- **Morpho Labs**: Morpho-Blue architecture
-- **OpenZeppelin**: Secure smart contract libraries
-- **Wagmi**: React hooks for Ethereum
-
-## Contact
-
-- **GitHub**: [pisuthd/madeinbear-evm](https://github.com/pisuthd/madeinbear-evm)
-- **Twitter**: [@MadeInBear](#)
-
----
-
-**MadeInBear — Confidential Banking on Ethereum** 🔒
