@@ -1,170 +1,270 @@
-# Fhenix CoFHE Hardhat Starter
+# MadeInBear — A Privacy Neobank for Ethereum using Fhenix FHE
 
-This project is a starter repository for developing FHE (Fully Homomorphic Encryption) smart contracts on the Fhenix network using CoFHE (Confidential Computing Framework for Homomorphic Encryption).
+MadeInBear is a privacy-first neobank for Ethereum powered by Fhenix Fully Homomorphic Encryption (FHE). It brings full banking functionality on-chain, enabling users to supply, borrow, and manage capital across multiple financial products while keeping balances and positions confidential by default.
 
-## Prerequisites
+Users can deposit assets into structured markets to earn yield from on-chain lending, credit demand, and other capital strategies. Over time, MadeInBear expands into a broader set of markets, including structured products such as RWA-backed yield strategies and institution-grade capital pools.
 
-- Node.js (v18 or later)
-- pnpm (recommended package manager)
+Each market operates with configurable access and compliance layers, enabling use cases that require KYC credentials, permissioned participation, or regulatory alignment — all enforced on-chain through selective disclosure.
 
-## Installation
+### Key Value Propositions
 
-1. Clone the repository:
+- **Confidential by Default**: All balances, positions, and financial activity are encrypted using Fhenix FHE
+- **ERC-7984 Confidential Tokens**: Standard assets are wrapped into confidential tokens for private on-chain usage
+- **Multi-Market Architecture**: Support for multiple financial products, from lending markets to RWA-backed strategies
+- **Selective Disclosure**: Users can reveal specific data points for compliance, auditing, or counterparties
+- **Composable Compliance**: Markets can enforce KYC, access control, and regulatory requirements at the protocol level
+- **On-Chain Verifiability**: Protocol logic remains transparent while sensitive user data stays encrypted
+
+## The Problem
+
+Current DeFi protocols expose all user positions publicly:
+
+1. **Institutional Barriers**: Banks, funds, and regulated entities cannot participate due to lack of privacy
+2. **Front-Running Risk**: Public positions are vulnerable to MEV and adversarial strategies
+3. **Strategic Exposure**: Portfolio allocations and position sizes are visible to competitors
+4. **Regulatory Misalignment**: KYC, AML, and compliance requirements conflict with transparent ledgers
+5. **Limited Product Scope**: Most DeFi protocols focus on isolated primitives instead of full financial systems
+
+---
+
+## Our Solution
+
+MadeInBear introduces a new model for on-chain finance by combining confidential computing with a market-based banking architecture:
+
+- **Confidential Financial Positions**  
+  All balances, deposits, loans, and collateral are stored and processed as encrypted values using :contentReference[oaicite:0]{index=0}, ensuring user financial data remains private by default
+
+- **ERC-7984 Confidential Tokens**  
+  Standard ERC20 assets are wrapped into confidential tokens, enabling private transfers, deposits, and interactions across all markets
+
+- **Market-Based Product Design**  
+  Financial products such as savings, credit, and structured yield are implemented as distinct markets, each with its own risk model, parameters, and capital flows
+
+- **Composable Financial Products**  
+  Markets can support a wide range of strategies, from on-chain lending to real-world asset (RWA) yield, enabling flexible capital allocation across different risk and return profiles
+
+- **Permissioned and Open Access**  
+  Markets can be fully permissionless or gated with requirements such as KYC credentials, allowing both retail and institutional participation within the same system
+
+- **Selective Disclosure for Compliance**  
+  Users can reveal specific financial data when required for KYC, AML, auditing, or counterparties, without exposing their entire portfolio
+
+- **Morpho-Based Lending Engine**: Built on a fork of Morpho Blue, leveraging isolated markets and efficient capital matching while extending it with confidential balances and account abstraction
+
+## Technical Architecture
+
+### Core Contracts
+
+#### CMorpho — Confidential Morpho-Blue Lending
+
+Built on Morpho-Blue, CMorpho is an FHE-encrypted isolated lending market where all user positions are encrypted on-chain.
+
+**Architecture:**
+```
+┌─────────────────────────────────────────────────────┐
+│                     CMorpho                         │
+│                                                     │
+│  Market (Id → MarketParams)                         │
+│  ├── loanToken: CToken (FHERC20)                  │
+│  ├── collateralToken: CToken (FHERC20)             │
+│  ├── oracle: IOracle                                │
+│  ├── irm: IIrm (Interest Rate Model)                │
+│  └── lltv: uint256 (Max LTV)                       │
+│                                                     │
+│  Position (encrypted per user per market)           │
+│  ├── supplyShares: euint128                         │
+│  ├── borrowShares: euint64                          │
+│  └── collateral: euint64                            │
+└─────────────────────────────────────────────────────┘
+```
+
+**Token Flow:**
+```
+ERC20 ──[wrap]──► CToken (FHERC20) ──[supply]──► CMorpho Market
+CToken (FHERC20) ◄──[withdraw/borrow]── CMorpho Market
+CToken (FHERC20) ──[unwrap]──► ERC20
+```
+
+#### CToken — ERC-7984 Confidential Token
+
+CToken wraps standard ERC20 tokens into confidential format using FHERC20:
+
+- **Shield**: Convert ERC20 → Confidential Token
+- **Unshield**: Initiate decryption claim to receive ERC20
+- **Confidential Transfers**: Transfer encrypted values on-chain
+
+```solidity
+// Wrap USDT to cUSDT
+CToken(0x...).wrap(erc20Amount);
+
+// Grant CMorpho as operator
+CToken(0x...).setOperator(cmorphoAddress, expirationTimestamp);
+
+// Supply to CMorpho
+CMorpho.supply(marketParams, assets, 0, userAddress, "");
+```
+
+### FHE Permission Model
+
+After every position update, permissions are granted to:
+
+| Entity | Access Level |
+|--------|-------------|
+| **Contract** (`allowThis`) | Needed for internal FHE operations |
+| **Position owner** (`allow(user)`) | User can decrypt their own position |
+| **Caller** (`allowSender`) | Transaction caller can read result |
+| **Liquidator** (`allow(liquidator)`) | Optional: designated liquidator can read all positions |
+
+### Smart Contract Addresses (Sepolia)
+
+| Contract | Address |
+|----------|---------|
+| cMorpho | `0x86A4AC7ab176EDC7b99ba0506ca2Aa63A4F576eB` |
+| Oracle | `0x3201f68B1e49a4172C643dA716ced6E78F8E9672` |
+| IRM | `0xCeA7AaD606823924B5fA26b5B8dB493Fd7c7f0b9` |
+| cUSDT | `0x1B86F12280F4241312DE4bd80cE2e8A5B5D06A9F` |
+| cETH | `0xFFff2977Fa735b530989f1fa761E6d3fe14d352B` |
+
+## Key Features
+
+### 🔒 Complete Privacy
+
+- All supply, borrow, and collateral positions encrypted
+- Transaction amounts hidden from public view
+- No information leakage to observers
+
+### ✅ Verifiable Operations
+
+- On-chain proofs for all operations
+- Protocol state remains auditable
+- Market-level data (TVL, utilization) visible
+
+### 🔐 Selective Disclosure
+
+- Permissioned decryption system
+- Grant access to specific addresses
+- Optional reveal for compliance
+
+### 🏦 Isolated Markets
+
+- Risk-isolated design (Morpho-Blue)
+- No contagion between markets
+- Deeper liquidity per market
+
+### 💰 ERC-7984 Confidential Tokens
+
+- Wrap ERC20 → Confidential Token
+- Transfer encrypted values
+- Unwrap anytime
+
+## How It Works
+
+### For Lenders (Supply)
+
+1. Wrap USDT → cUSDT at Portfolio
+2. Grant CMorpho as operator on cUSDT
+3. Supply cUSDT to earn yield
+4. Your balance stays private with FHE
+5. Unwrap anytime to withdraw
+
+### For Borrowers
+
+1. Wrap ETH → cETH at Portfolio
+2. Grant CMorpho as operator on cETH
+3. Use cETH as collateral (75% LTV)
+4. Borrow USDT against your position
+5. Repay to unlock collateral
+
+## Known Trade-offs
+
+| Item | Status | Notes |
+|------|--------|-------|
+| Health check on borrow | ⚠️ Skipped | Cannot `require()` on encrypted `ebool`. Enforced via liquidation. |
+| Liquidation | 🔲 Not implemented | Needs encrypted health check → liquidator bot pattern |
+| Flash loans | 🔲 Not implemented | `flashLoan()` not yet implemented |
+| Fee recipient | ❌ Removed | All interest accrues to suppliers (no fee) |
+| FHE division rounding | ⚠️ Truncates | FHE div rounds down (less conservative) |
+
+## Technology Stack
+
+### Blockchain
+- **Network**: Fhenix Network (FHE-enabled Layer 2)
+- **EVM Compatible**: Full Solidity support
+
+### Smart Contracts
+- **Language**: Solidity ^0.8.25, EVM Cancun
+- **FHE Library**: @fhenixprotocol/cofhe-contracts
+- **Architecture**: Morpho-Blue with FHE encryption
+
+### Frontend
+- **Framework**: React 18 + TypeScript
+- **Build Tool**: Vite
+- **Web3**: Wagmi + Viem
+- **FHE SDK**: @cofhe/sdk
+- **Styling**: Tailwind CSS
+
+## Getting Started
 
 ```bash
-git clone https://github.com/fhenixprotocol/cofhe-hardhat-starter.git
-cd cofhe-hardhat-starter
+# Clone repository
+git clone https://github.com/pisuthd/madeinbear-evm.git
+cd madeinbear
+
+# Install dependencies
+npm install
+
+# Compile contracts
+npx hardhat compile
+
+# Run tests
+npm test
+
+# Start frontend
+cd client
+npm install
+npm run dev
 ```
 
-2. Install dependencies:
+## Live Demo
 
-```bash
-pnpm install
-```
+1. Connect wallet to Sepolia testnet
+2. Get test tokens from faucet
+3. Wrap tokens to confidential format
+4. Supply or borrow on isolated markets
+5. View your encrypted positions
 
-## Available Scripts
+## Security
 
-### Development
+### Current Status
+- ✅ Comprehensive test suite
+- ✅ Fhenix CoFHE integration
+- ✅ Morpho-Blue battle-tested architecture
 
-- `pnpm compile` - Compile the smart contracts
-- `pnpm clean` - Clean the project artifacts
-- `pnpm test` - Run tests on the local CoFHE network
-- `pnpm test:hardhat` - Run tests on the Hardhat network
-- `pnpm test:localcofhe` - Run tests on the local CoFHE network
-
-### Local CoFHE Network
-
-- `pnpm localcofhe:start` - Start a local CoFHE network
-- `pnpm localcofhe:stop` - Stop the local CoFHE network
-- `pnpm localcofhe:faucet` - Get test tokens from the faucet
-- `pnpm localcofhe:deploy` - Deploy contracts to the local CoFHE network
-
-### Contract Tasks
-
-- `pnpm task:deploy` - Deploy contracts
-- `pnpm task:addCount` - Add to the counter
-- `pnpm task:getCount` - Get the current count
-- `pnpm task:getFunds` - Get funds from the contract
-
-## Project Structure
-
-- `contracts/` - Smart contract source files
-  - `Counter.sol` - Example FHE counter contract
-  - `Lock.sol` - Example time-locked contract
-- `test/` - Test files
-- `ignition/` - Hardhat Ignition deployment modules
-
-## `cofhejs` and `cofhe-hardhat-plugin`
-
-This project uses cofhejs and the CoFHE Hardhat plugin to interact with FHE (Fully Homomorphic Encryption) smart contracts. Here are the key features and utilities:
-
-### cofhejs Features
-
-- **Encryption/Decryption**: Encrypt and decrypt values using FHE
-
-  ```typescript
-  import { cofhejs, Encryptable, FheTypes } from 'cofhejs/node'
-
-  // Encrypt a value
-  const [encryptedInput] = await cofhejs.encrypt(
-  	(step) => {
-  		console.log(`Encrypt step - ${step}`)
-  	},
-  	[Encryptable.uint32(5n)]
-  )
-
-  // Decrypt a value
-  const decryptedResult = await cofhejs.decrypt(encryptedValue, FheTypes.Uint32)
-  ```
-
-- **Unsealing**: Unseal encrypted values from the blockchain
-  ```typescript
-  const unsealedResult = await cofhejs.unseal(encryptedValue, FheTypes.Uint32)
-  ```
-
-### `cofhe-hardhat-plugin` Features
-
-- **Network Configuration**: Automatically configures the cofhe enabled networks
-- **Wallet Funding**: Automatically funds wallets on the local network
-
-  ```typescript
-  import { localcofheFundWalletIfNeeded } from 'cofhe-hardhat-plugin'
-  await localcofheFundWalletIfNeeded(hre, walletAddress)
-  ```
-
-- **Signer Initialization**: Initialize cofhejs with a Hardhat signer
-
-  ```typescript
-  import { cofhejs_initializeWithHardhatSigner } from 'cofhe-hardhat-plugin'
-  await cofhejs_initializeWithHardhatSigner(signer)
-  ```
-
-- **Testing Utilities**: Helper functions for testing FHE contracts
-  ```typescript
-  import { expectResultSuccess, expectResultValue, mock_expectPlaintext, isPermittedCofheEnvironment } from 'cofhe-hardhat-plugin'
-  ```
-
-### Environment Configuration
-
-The plugin supports different environments:
-
-- `MOCK`: For testing with mocked FHE operations
-- `LOCAL`: For testing with a local CoFHE network (whitelist only)
-- `TESTNET`: For testing and tasks using `arb-sepolia` and `eth-sepolia`
-
-You can check the current environment using:
-
-```typescript
-if (!isPermittedCofheEnvironment(hre, 'MOCK')) {
-	// Skip test or handle accordingly
-}
-```
-
-## Links and Additional Resources
-
-### `cofhejs`
-
-[`cofhejs`](https://github.com/FhenixProtocol/cofhejs) is the JavaScript/TypeScript library for interacting with FHE smart contracts. It provides functions for encryption, decryption, and unsealing FHE values.
-
-#### Key Features
-
-- Encryption of data before sending to FHE contracts
-- Unsealing encrypted values from contracts
-- Managing permits for secure contract interactions
-- Integration with Web3 libraries (ethers.js and viem)
-
-### `cofhe-mock-contracts`
-
-[`cofhe-mock-contracts`](https://github.com/FhenixProtocol/cofhe-mock-contracts) provides mock implementations of CoFHE contracts for testing FHE functionality without the actual coprocessor.
-
-#### Features
-
-- Mock implementations of core CoFHE contracts:
-  - MockTaskManager
-  - MockQueryDecrypter
-  - MockZkVerifier
-  - ACL (Access Control List)
-- Synchronous operation simulation with mock delays
-- On-chain access to unencrypted values for testing
-
-#### Integration with Hardhat and cofhejs
-
-Both `cofhejs` and `cofhe-hardhat-plugin` interact directly with the mock contracts:
-
-- When imported in `hardhat.config.ts`, `cofhe-hardhat-plugin` injects necessary mock contracts into the Hardhat testnet
-- `cofhejs` automatically detects mock contracts and adjusts behavior for test environments
-
-#### Mock Behavior Differences
-
-- **Symbolic Execution**: In mocks, ciphertext hashes point to plaintext values stored on-chain
-- **On-chain Decryption**: Mock decryption adds simulated delays to mimic real behavior
-- **ZK Verification**: Mock verifier handles on-chain storage of encrypted inputs
-- **Off-chain Decryption**: When using `cofhejs.unseal()`, mocks return plaintext values directly from on-chain storage
-
-## License
-
-MIT
+### Production Checklist
+- [ ] Independent security audit
+- [ ] Bug bounty program
+- [ ] Multi-sig ownership
 
 ## Contributing
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+Contributions welcome! Please open an issue to discuss major changes.
+
+## License
+
+MIT License. See [LICENSE](LICENSE).
+
+## Acknowledgments
+
+- **Fhenix Protocol**: FHE infrastructure and SDK
+- **Morpho Labs**: Morpho-Blue architecture
+- **OpenZeppelin**: Secure smart contract libraries
+- **Wagmi**: React hooks for Ethereum
+
+## Contact
+
+- **GitHub**: [pisuthd/madeinbear-evm](https://github.com/pisuthd/madeinbear-evm)
+- **Twitter**: [@MadeInBear](#)
+
+---
+
+**MadeInBear — Confidential Banking on Ethereum** 🔒
